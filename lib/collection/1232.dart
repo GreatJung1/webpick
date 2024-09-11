@@ -110,7 +110,7 @@ Widget _buildGenreCell(String genre, bool isLight) {
     flex: 1,
     child: Container(
       height: 40,
-      color: isLight ? Colors.grey.shade50 : Colors.grey.shade300,
+      color: isLight ? Color(0xFF76ABAE) : Colors.white,
       padding: EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0),
       alignment: Alignment.center,
       child: Text(

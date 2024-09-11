@@ -15,7 +15,7 @@ class _CollectionState extends State<Collection> {
   final CollectionReference webtoonCollection = FirebaseFirestore.instance.collection("webtoonDB");
   bool _isTagSearch = false;
   final List<String> platforms = ['네이버', '전체', '카카오'];
-  final List<String> genres = ['장르1', '장르2', '장르3', '장르4', '장르5']; // 예시 장르 목록
+  final List<String> genres = ['학원', '판타지', '일상', '로맨스', '개그','액션','드라마','공포','스릴러','무협','미스터리/추리','로맨스 판타지','성인']; // 예시 장르 목록
 
   void _toggleSearchMode(bool isTagSearch) {
     setState(() {
@@ -34,8 +34,8 @@ class _CollectionState extends State<Collection> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        toolbarHeight: 50,
+        backgroundColor: Colors.white,
+        toolbarHeight: 70,
         flexibleSpace: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -43,25 +43,47 @@ class _CollectionState extends State<Collection> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  TextButton(
+                  OutlinedButton(
                     onPressed: () {
                       _toggleSearchMode(false); // 일반 검색 모드로 전환
                     },
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20), // 둥근 모서리 설정
+                      ),
+                      side: BorderSide(
+                        color: _isTagSearch ? Colors.grey : Color(0xFF76ABAE), // 선택 상태에 따라 테두리 색상 변경
+                      ),
+                    ),
                     child: Text(
                       '장르',
                       style: TextStyle(
-                        color: _isTagSearch ? Colors.grey : Colors.black, // 선택 상태에 따라 색상 변경
+                        fontSize: 16.0, // 텍스트 크기 설정
+                        fontFamily: 'Pretendard',
+                        fontWeight: FontWeight.w600,
+                        color: _isTagSearch ? Colors.grey : Color(0xFF76ABAE), // 선택 상태에 따라 텍스트 색상 변경
                       ),
                     ),
                   ),
-                  TextButton(
+                  OutlinedButton(
                     onPressed: () {
                       _toggleSearchMode(true); // 태그 검색 모드로 전환
                     },
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20), // 둥근 모서리 설정
+                      ),
+                      side: BorderSide(
+                        color: _isTagSearch ? Color(0xFF76ABAE) : Colors.grey, // 선택 상태에 따라 테두리 색상 변경
+                      ),
+                    ),
                     child: Text(
                       '요일',
                       style: TextStyle(
-                        color: _isTagSearch ? Colors.black : Colors.grey, // 선택 상태에 따라 색상 변경
+                        fontSize: 16.0, // 텍스트 크기 설정
+                        fontFamily: 'Pretendard',
+                        fontWeight: FontWeight.w600,
+                        color: _isTagSearch ? Color(0xFF76ABAE) : Colors.grey, // 선택 상태에 따라 텍스트 색상 변경
                       ),
                     ),
                   ),

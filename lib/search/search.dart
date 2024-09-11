@@ -17,7 +17,11 @@ class SearchBarPage extends StatefulWidget {
 class _SearchBarPageState extends State<SearchBarPage> {
   final CollectionReference webtoonCollection = FirebaseFirestore.instance.collection("webtoonDB");
   final TextEditingController _searchController = TextEditingController();
-  final List<String> genres = ['장르1', '장르2', '장르3', '장르4', '장르5'];
+  final List<String> genres = ['학원', '판타지', '일상', '로맨스', '개그','액션','드라마','공포','스릴러','무협','미스터리/추리','로맨스 판타지','성인',//13
+    '현대물','서양풍','동양풍',//16
+    '검정 머리','보라 머리','천재','사이다',//20
+    '2등신','5등신','8등신','실사','반실사',//25
+    '네이버','카카오','연재','휴재','완결','20화 이하','20~50화','50~100화','100~250화','250화 이상'];
   List<String> _searchHistory = [];
 
   String _searchQuery = '';
@@ -78,8 +82,8 @@ class _SearchBarPageState extends State<SearchBarPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        toolbarHeight: 50,
+        backgroundColor: Colors.white,
+        toolbarHeight: 70,
         flexibleSpace: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -87,27 +91,49 @@ class _SearchBarPageState extends State<SearchBarPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  TextButton(
+                  OutlinedButton(
                     onPressed: () {
                       print("일반 검색 버튼 클릭됨");
                       _toggleSearchMode(false); // 일반 검색 모드로 전환
                     },
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20), // 둥근 모서리 설정
+                      ),
+                      side: BorderSide(
+                        color: _isTagSearch ? Colors.grey : Color(0xFF76ABAE), // 선택 상태에 따라 테두리 색상 변경
+                      ),
+                    ),
                     child: Text(
                       '일반 검색',
                       style: TextStyle(
-                        color: _isTagSearch ? Colors.grey : Colors.black, // 선택 상태에 따라 색상 변경
+                        fontSize: 16.0, // 텍스트 크기 설정
+                        fontFamily: 'Pretendard',
+                        fontWeight: FontWeight.w600,
+                        color: _isTagSearch ? Colors.grey : Color(0xFF76ABAE), // 선택 상태에 따라 색상 변경
                       ),
                     ),
                   ),
-                  TextButton(
+                  OutlinedButton(
                     onPressed: () {
                       print("태그 검색 버튼 클릭됨");
                       _toggleSearchMode(true); // 태그 검색 모드로 전환
                     },
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20), // 둥근 모서리 설정
+                      ),
+                      side: BorderSide(
+                        color: _isTagSearch ? Color(0xFF76ABAE) : Colors.grey, // 선택 상태에 따라 테두리 색상 변경
+                      ),
+                    ),
                     child: Text(
                       '태그 검색',
                       style: TextStyle(
-                        color: _isTagSearch ? Colors.black : Colors.grey, // 선택 상태에 따라 색상 변경
+                        fontSize: 16.0, // 텍스트 크기 설정
+                        fontFamily: 'Pretendard',
+                        fontWeight: FontWeight.w600,
+                        color: _isTagSearch ? Color(0xFF76ABAE) : Colors.grey, // 선택 상태에 따라 색상 변경
                       ),
                     ),
                   ),

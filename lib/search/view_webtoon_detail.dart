@@ -11,14 +11,30 @@ class ViewWebtoonDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("' $searchQuery ' 로 검색한 결과입니다.",
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      backgroundColor: Colors.white, // 원하는 배경색으로 설정
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(70.0), // AppBar의 높이를 70으로 설정
+        child: AppBar(
+          title: Text(
+            "' $searchQuery ' 로 검색한 결과입니다.",
+            style: TextStyle(
+              fontFamily: 'Pretendard',
+              fontSize: 16.0,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          backgroundColor: Colors.white,
+          centerTitle: true, // 제목을 중앙에 위치시키기 위해 추가
+        ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            height: 0.5,
+            color: Colors.grey,
+          ),
           // 검색 결과 개수 표시
           Container(
             padding: const EdgeInsets.all(10.0),
@@ -34,11 +50,12 @@ class ViewWebtoonDetailPage extends StatelessWidget {
                   }).toList();
 
                   return Text(
-                      '웹툰 (${filteredDocs.length})',
+                      '  ${filteredDocs.length}개',
                       style: TextStyle(
-                      fontSize: 13.0,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.bold,
+                        fontFamily: 'Pretendard',
+                        fontSize: 14.0,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
                       ),
                   );
                 } else if (streamSnapshot.hasError) {
@@ -83,30 +100,123 @@ class ViewWebtoonDetailPage extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final DocumentSnapshot documentSnapshot = filteredDocs[index];
                       return Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+                        padding: EdgeInsets.symmetric(vertical: 4.0),
                         child: Material(
-                          elevation: 8,
-                          borderRadius: BorderRadius.circular(10),
                           color: Colors.white,
-                          child: ListTile(
-                            title: Text(
-                              documentSnapshot['title'],
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                            ),
-                            subtitle: Text(
-                              'Writer: ${documentSnapshot['writer']}\nPlatform: ${documentSnapshot['platform']}',
-                              style: TextStyle(fontSize: 13),
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => IndividualWebtoonDetailPage(
-                                    webtoonId: documentSnapshot.id, // 웹툰의 ID 전달
+                          child: Column(
+                            children: [
+                              // 기존 Row 위젯
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center, // 상하 중앙 정렬
+                                children: [
+                                  // 사진 부분
+                                  Stack(
+                                    children: [
+                                      Container(
+                                        width: 80, // 원하는 사진의 너비
+                                        height: 80, // 원하는 사진의 높이
+                                        margin: EdgeInsets.only(left: 18.0, right: 18.0, top: 10.0, bottom: 10.0),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(8), // 모서리 둥글게 설정
+                                          image: DecorationImage(
+                                            image: AssetImage('assets/icons/Naver_Line_Webtoon_logo.png'),
+                                            fit: BoxFit.cover, // 사진이 박스에 맞게 채워지도록 설정
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        bottom: 10,
+                                        right: 10,
+                                        child: Container(
+                                          width: 14, // 아이콘의 너비
+                                          height: 14, // 아이콘의 높이
+                                          decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                              image: AssetImage(
+                                                  documentSnapshot['platform']?.toString().toLowerCase() == 'kakao'
+                                                      ? 'assets/icons/Kakao.png'
+                                                      : 'assets/icons/Naver.png'
+                                              ),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              );
-                            },
+                                  // 글 리스트 부분
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            documentSnapshot['title'],
+                                            style: TextStyle(
+                                              color: Color(0xFF222831),
+                                              fontFamily: 'Pretendard',
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 19,
+                                            ),
+                                          ),
+                                          SizedBox(height: 5),
+                                          Text(
+                                            '${documentSnapshot['writer']}',
+                                            style: TextStyle(
+                                              color: Colors.grey,
+                                              fontFamily: 'Pretendard',
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                          Text(
+                                            documentSnapshot['end']
+                                                ? '${documentSnapshot['genre']} ${documentSnapshot['episode']}화 완결'
+                                                : '${documentSnapshot['genre']} ${documentSnapshot['episode']}화 ${documentSnapshot['weekday']}요일',
+                                            style: TextStyle(
+                                              color: Colors.grey,
+                                              fontFamily: 'Pretendard',
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    width: 23, // 첫 번째 이미지의 너비
+                                    height: 20,
+                                    margin: EdgeInsets.all(10), // 이미지와 텍스트 간의 간격 조정
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage('assets/icons/like.png'), // 첫 번째 이미지 경로
+                                        fit: BoxFit.cover, // 사진이 박스에 맞게 채워지도록 설정
+                                      ),
+                                    ),
+                                  ),
+                                  // 두 번째 이미지
+                                  Container(
+                                    width: 24, // 두 번째 이미지의 너비
+                                    height: 17,
+                                    margin: EdgeInsets.only(left: 10.0, right: 20.0),
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage('assets/icons/box.png'), // 두 번째 이미지 경로
+                                        fit: BoxFit.cover, // 사진이 박스에 맞게 채워지도록 설정
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              // 새로운 요소 추가
+                              Container(
+                                height: 0.5,
+                                width: double.infinity,
+                                color: Colors.grey,
+                              ),
+                            ],
                           ),
                         ),
                       );
@@ -121,7 +231,7 @@ class ViewWebtoonDetailPage extends StatelessWidget {
             ),
           ),
         ],
-      ),
+      )
     );
   }
 }

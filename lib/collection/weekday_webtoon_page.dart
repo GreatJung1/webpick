@@ -13,6 +13,7 @@ class WeekdayWebtoonPage extends StatefulWidget {
 
 class _WeekdayWebtoonPageState extends State<WeekdayWebtoonPage> {
   String _searchWeekday = '월'; // 초기 선택된 요일
+  bool isPressed = false; // 버튼 클릭 상태를 관리하는 변수
   bool excludeHiatus = false; // '휴재 제외' 버튼 상태
   bool excludeCompleted = false; // '완결 제외' 버튼 상태
 
@@ -31,84 +32,144 @@ class _WeekdayWebtoonPageState extends State<WeekdayWebtoonPage> {
       children: [
         // 요일 버튼들
         Container(
-          height: 1.5,
-          color: Colors.black,
+          height: 0.5,
+          color: Colors.grey,
         ),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 모든 자식 요소를 균등하게 배치
           children: [
-            for (var weekday in ['월', '화', '수', '목', '금', '토', '일'])
+            for (var weekday in ['월', '화', '수', '목', '금', '토', '일','완결'])
               Expanded(
-                child: TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _searchWeekday = weekday;
-                    });
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: _searchWeekday == weekday ? Colors.white : Colors.black,
-                    backgroundColor: _searchWeekday == weekday ? Colors.blue : Colors.transparent,
-                  ),
-                  child: Text(
-                    weekday,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0),
+                child: SizedBox(
+                  height: 40, // 높이를 40으로 고정
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _searchWeekday = weekday;
+                      });
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: _searchWeekday == weekday ? Colors.white : Color(0xFF222831),
+                      backgroundColor: _searchWeekday == weekday ? Color(0xFF76ABAE) : Colors.transparent,
+                      minimumSize: Size(double.infinity, 40), // 버튼의 최소 높이 설정
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.zero, // 모서리를 직각으로 설정
+                      ),
+                    ),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown, // 텍스트를 컨테이너에 맞게 축소
+                      child: Text(
+                        weekday,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Pretendard',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
           ],
         ),
         Container(
-          height: 1.5,
-          color: Colors.black,
+          height: 1,
+          color: Color(0xFF222831),
         ),
         // 필터 버튼들
         Row(
           children: [
-            _buildFilterButton(
-              label: '휴재 제외',
-              value: excludeHiatus,
-              onChanged: (newValue) {
-                setState(() {
-                  excludeHiatus = newValue;
-                });
-              },
-            ),
-            _buildFilterButton(
-              label: '완결 제외',
-              value: excludeCompleted,
-              onChanged: (newValue) {
-                setState(() {
-                  excludeCompleted = newValue;
-                });
-              },
-            ),
-            SizedBox(width: 16), // 버튼 간의 간격
-            DropdownButton<int>(
-              value: selectedNumber,
-              items: numberOptions.map((int number) {
-                return DropdownMenuItem<int>(
-                  value: number,
-                  child: Text(number.toString()),
-                );
-              }).toList(),
-              onChanged: (int? newValue) {
-                if (newValue != null) {
+            Padding(
+              padding: EdgeInsets.only(left: 30.0),
+              child: GestureDetector(
+                onTap: () {
                   setState(() {
-                    selectedNumber = newValue;
+                    isPressed = !isPressed; // 클릭 상태를 토글
                   });
-                }
-              },
+                  print('Circle button pressed');
+                },
+                child: Container(
+                  width: 16.0, // 버튼의 너비
+                  height: 16.0, // 버튼의 높이
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle, // 원형 모양으로 설정
+                    color: Colors.transparent, // 배경색을 투명으로 설정
+                    border: Border.all( // 테두리 설정
+                      color: Colors.grey, // 테두리 색상
+                      width: 0.5, // 테두리 두께
+                    ),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center, // Stack 안의 아이템을 가운데 정렬
+                    children: [
+                      if (isPressed) // 클릭 상태일 때만 작은 원을 추가
+                        Container(
+                          width: 8.0, // 작은 원의 너비
+                          height: 8.0, // 작은 원의 높이
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle, // 원형 모양으로 설정
+                            color: Colors.grey, // 작은 원의 색상
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 10.0, right: 10), // 오른쪽에 여백 추가
+              child: DropdownButton<int>(
+                value: selectedNumber,
+                items: numberOptions.map((int number) {
+                  return DropdownMenuItem<int>(
+                    value: number,
+                    child: Text(number.toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontFamily: 'Pretendard',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16.0,
+                          color: Colors.grey
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (int? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      selectedNumber = newValue;
+                    });
+                  }
+                },
+              ),
             ),
             DropdownButton<bool>(
               value: isitmore,
               items: [
                 DropdownMenuItem<bool>(
                   value: false,
-                  child: Text('미만'),
+                  child: Text(
+                    '미만',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: 'Pretendard',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16.0,
+                        color: Colors.grey
+                    ),),
                 ),
                 DropdownMenuItem<bool>(
                   value: true,
-                  child: Text('이상'),
+                  child: Text(
+                    '이상',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: 'Pretendard',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16.0,
+                        color: Colors.grey
+                    ),),
                 ),
               ],
               onChanged: (bool? newValue) {
@@ -119,12 +180,116 @@ class _WeekdayWebtoonPageState extends State<WeekdayWebtoonPage> {
                 }
               },
             ),
-
+            // 휴재 제외 버튼
+            Padding(
+              padding: EdgeInsets.only(left: 16.0),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    excludeHiatus = !excludeHiatus; // 휴재 제외 토글
+                  });
+                  print('Circle button pressed');
+                },
+                child: Container(
+                  width: 16.0, // 버튼의 너비
+                  height: 16.0, // 버튼의 높이
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle, // 원형 모양으로 설정
+                    color: Colors.transparent, // 배경색을 투명으로 설정
+                    border: Border.all( // 테두리 설정
+                      color: Colors.grey, // 테두리 색상
+                      width: 0.5, // 테두리 두께
+                    ),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center, // Stack 안의 아이템을 가운데 정렬
+                    children: [
+                      if (excludeHiatus) // 클릭 상태일 때만 작은 원을 추가
+                        Container(
+                          width: 8.0, // 작은 원의 너비
+                          height: 8.0, // 작은 원의 높이
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle, // 원형 모양으로 설정
+                            color: Colors.grey, // 작은 원의 색상
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              height: 40,
+              padding: EdgeInsets.only(left: 6.0),
+              alignment: Alignment.center,
+              child: Text(
+                "휴재 제외",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontFamily: 'Pretendard',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16.0,
+                    color: Colors.grey
+                ),
+              ),
+            ),
+            // 완결 제외 버튼
+            Padding(
+              padding: EdgeInsets.only(left: 16.0),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    excludeCompleted = !excludeCompleted; // 완결 제외 토글
+                  });
+                  print('Circle button pressed');
+                },
+                child: Container(
+                  width: 16.0, // 버튼의 너비
+                  height: 16.0, // 버튼의 높이
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle, // 원형 모양으로 설정
+                    color: Colors.transparent, // 배경색을 투명으로 설정
+                    border: Border.all( // 테두리 설정
+                      color: Colors.grey, // 테두리 색상
+                      width: 0.5, // 테두리 두께
+                    ),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center, // Stack 안의 아이템을 가운데 정렬
+                    children: [
+                      if (excludeCompleted) // 클릭 상태일 때만 작은 원을 추가
+                        Container(
+                          width: 8.0, // 작은 원의 너비
+                          height: 8.0, // 작은 원의 높이
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle, // 원형 모양으로 설정
+                            color: Colors.grey, // 작은 원의 색상
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              height: 40,
+              padding: EdgeInsets.only(right: 20.0, left: 6.0),
+              alignment: Alignment.center,
+              child: Text(
+                "완결 제외",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontFamily: 'Pretendard',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16.0,
+                    color: Colors.grey
+                ),
+              ),
+            ),
           ],
         ),
-        Container(
-          height: 1.5,
-          color: Colors.black,
+        SizedBox(
+          height: 20,
         ),
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
@@ -181,25 +346,68 @@ class _WeekdayWebtoonPageState extends State<WeekdayWebtoonPage> {
 
                   return Padding(
                     padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-                    child: Material(
-                      color: Colors.grey.shade300,
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => IndividualWebtoonDetailPage(
-                                webtoonId: doc.id,
-                              ),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => IndividualWebtoonDetailPage(
+                              webtoonId: doc.id,
                             ),
-                          );
-                        },
-                        child: ListTile(
-                          title: Text(
-                            title,
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                           ),
-                        ),
+                        );
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
+                        children: [
+                          Stack(
+                            children: [
+                              Container(
+                                  width: 120,
+                                  height: 160,
+                                  //color: Colors.grey.shade300, // 회색 배경색 적용
+                                  margin: EdgeInsets.all(10), // 이미지와 텍스트 간의 간격 조정
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: AssetImage('assets/icons/Naver_Line_Webtoon_logo.png'),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              Positioned(
+                                bottom: 10,
+                                right: 10,
+                                child: Container(
+                                  width: 16, // 아이콘의 너비
+                                  height: 16, // 아이콘의 높이
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: doc['platform']?.toString().toLowerCase() == '카카오'
+                                          ? AssetImage('assets/icons/Kakao.png')
+                                          : AssetImage('assets/icons/Naver.png'),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8), // 이미지와 제목 간의 간격
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                            child: Text(
+                              title,
+                              style: TextStyle(
+                                fontSize: 18.0, // 텍스트 크기 설정
+                                fontFamily: 'Pretendard',
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF222831),
+                              ),
+                              overflow: TextOverflow.ellipsis, // 줄임표 설정
+                              maxLines: 1, // 최대 줄 수 설정
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -227,8 +435,8 @@ class _WeekdayWebtoonPageState extends State<WeekdayWebtoonPage> {
             onChanged(!value);
           },
           style: TextButton.styleFrom(
-            foregroundColor: value ? Colors.white : Colors.black,
-            backgroundColor: value ? Colors.blue : Colors.transparent,
+            foregroundColor: value ? Colors.white : Color(0xFF222831),
+            backgroundColor: value ? Color(0xFF76ABAE) : Colors.transparent,
           ),
           child: Text(
             label,

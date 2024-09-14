@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../search/search.dart';
 import '../collection/collection.dart';
 import '../home/home_test.dart';
+import '../pickabook/pickABook_page.dart';
+import '../my_page/my_page.dart';
 
 class DefaultWidget extends StatefulWidget {
   const DefaultWidget({Key? key}) : super(key: key);
@@ -25,8 +27,8 @@ class _DefaultWidgetState extends State<DefaultWidget> {
       SearchBarPage(),
       Collection(),
       SearchPage(),
-      const Center(child: Text('Messages')),
-      const Center(child: Text('Settings')),
+      PickABookPage(),
+      MyPage(),
     ];
 
     return Scaffold(

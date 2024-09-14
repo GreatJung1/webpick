@@ -39,6 +39,15 @@ dependencies:
   cloud_firestore : 5.3.0
   shared_preferences : 2.3.2
   firebase_storage : 12.2.0
+  firebase_auth: ^5.2.0
+  url_launcher : 6.3.0
+  http: ^1.2.2
+  image_picker : ^1.1.2
+  fluttertoast: ^8.0.8
+  google_fonts: ^6.2.1
+  get: ^4.6.1
+  google_sign_in: ^6.2.1
+
 
 dev_dependencies:
   flutter_test:
@@ -78,6 +87,9 @@ flutter:
     - assets/icons/Component 2.png
     - assets/icons/Lock.png
     - assets/icons/Group 43.png
+    - assets/icons/Rectangle_grey.png
+    - assets/icons/google.png
+
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

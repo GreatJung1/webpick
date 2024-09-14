@@ -16,6 +16,7 @@ class SearchBarPage extends StatefulWidget {
 
 class _SearchBarPageState extends State<SearchBarPage> {
   final CollectionReference webtoonCollection = FirebaseFirestore.instance.collection("webtoonDB");
+  final CollectionReference webtoonTagCollection = FirebaseFirestore.instance.collection("webtoon_tagDB");
   final TextEditingController _searchController = TextEditingController();
   final List<String> genres = ['학원', '판타지', '일상', '로맨스', '개그','액션','드라마','공포','스릴러','무협','미스터리/추리','로맨스 판타지','성인',//13
     '현대물','서양풍','동양풍',//16
@@ -154,6 +155,7 @@ class _SearchBarPageState extends State<SearchBarPage> {
           webtoonCollection: webtoonCollection,
           onSearchChange: onSearchChange,
           context: context,
+            webtoonTagCollection : webtoonTagCollection
         ),
       ),
     );

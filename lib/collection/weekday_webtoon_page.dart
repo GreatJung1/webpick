@@ -364,7 +364,7 @@ class _WeekdayWebtoonPageState extends State<WeekdayWebtoonPage> {
                             children: [
                               Container(
                                   width: 120,
-                                  height: 160,
+                                  height: 75,
                                   //color: Colors.grey.shade300, // 회색 배경색 적용
                                   margin: EdgeInsets.all(10), // 이미지와 텍스트 간의 간격 조정
                                   decoration: BoxDecoration(

@@ -9,6 +9,7 @@ Widget buildGeneralSearchBody({
   required CollectionReference webtoonCollection,
   required void Function(String) onSearchChange,
   required BuildContext context,
+  required CollectionReference webtoonTagCollection,
 }) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,

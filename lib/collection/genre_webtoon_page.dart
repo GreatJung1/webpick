@@ -485,20 +485,16 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
                           children: [
                             Stack(
                               children: [
-                                Expanded(
-                                  child: Container(
-                                    width: 120,
-                                    height: 160,
-                                    color: Colors.grey.shade300, // 회색 배경색 적용
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image: AssetImage('assets/icons/Naver_Line_Webtoon_logo.png'),
-                                        fit: BoxFit.cover,
-                                      ),
+                                Container(
+                                  width: 120,  // 직접 크기 지정
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: AssetImage('assets/icons/Naver_Line_Webtoon_logo.png'),
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
                                 ),
-
                                 Positioned(
                                   bottom: 10,
                                   right: 10,
@@ -517,6 +513,7 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
                                 ),
                               ],
                             ),
+
                             SizedBox(height: 8), // 이미지와 제목 간의 간격
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 6.0),

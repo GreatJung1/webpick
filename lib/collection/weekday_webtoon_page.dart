@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../individual_webtoon_detail/individual_webtoon_detail_page.dart';
+import './collection_class_manager.dart';
 
 class WeekdayWebtoonPage extends StatefulWidget {
   final CollectionReference webtoonCollection;
@@ -289,7 +290,7 @@ class _WeekdayWebtoonPageState extends State<WeekdayWebtoonPage> {
           ],
         ),
         SizedBox(
-          height: 20,
+          height: 30,
         ),
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
@@ -336,7 +337,7 @@ class _WeekdayWebtoonPageState extends State<WeekdayWebtoonPage> {
               return GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
-                  crossAxisSpacing: 0.0,
+                  crossAxisSpacing: 10.0,
                   mainAxisSpacing: 10.0,
                 ),
                 itemCount: filteredDocs.length,
@@ -344,72 +345,13 @@ class _WeekdayWebtoonPageState extends State<WeekdayWebtoonPage> {
                   final doc = filteredDocs[index];
                   String title = doc['title'] ?? '제목 없음';
 
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => IndividualWebtoonDetailPage(
-                              webtoonId: doc.id,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
-                        children: [
-                          Stack(
-                            children: [
-                              Container(
-                                  width: 120,
-                                  height: 75,
-                                  //color: Colors.grey.shade300, // 회색 배경색 적용
-                                  margin: EdgeInsets.all(10), // 이미지와 텍스트 간의 간격 조정
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: AssetImage('assets/icons/Naver_Line_Webtoon_logo.png'),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                              Positioned(
-                                bottom: 10,
-                                right: 10,
-                                child: Container(
-                                  width: 16, // 아이콘의 너비
-                                  height: 16, // 아이콘의 높이
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: doc['platform']?.toString().toLowerCase() == '카카오'
-                                          ? AssetImage('assets/icons/Kakao.png')
-                                          : AssetImage('assets/icons/Naver.png'),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 8), // 이미지와 제목 간의 간격
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                            child: Text(
-                              title,
-                              style: TextStyle(
-                                fontSize: 18.0, // 텍스트 크기 설정
-                                fontFamily: 'Pretendard',
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFF222831),
-                              ),
-                              overflow: TextOverflow.ellipsis, // 줄임표 설정
-                              maxLines: 1, // 최대 줄 수 설정
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  return WebtoonCard(
+                    title: title,
+                    webtoonId: doc.id,
+                    platformImage: doc['platform']?.toString().toLowerCase() == '카카오'
+                        ? 'assets/icons/Kakao.png'
+                        : 'assets/icons/Naver.png',
+                    imageUrl: 'assets/icons/like.png',
                   );
                 },
               );

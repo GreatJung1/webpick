@@ -149,13 +149,11 @@ class _SearchBarPageState extends State<SearchBarPage> {
         child: _isTagSearch
             ? GenreWebtoonPage(webtoonCollection : webtoonCollection,
             genres : genres)
-            : buildGeneralSearchBody(
+            : SearchBodyWidget(
           searchController: _searchController,
           searchQuery: _searchQuery,
           webtoonCollection: webtoonCollection,
           onSearchChange: onSearchChange,
-          context: context,
-            webtoonTagCollection : webtoonTagCollection
         ),
       ),
     );

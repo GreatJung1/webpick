@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import './view_webtoon_detail.dart';
 import './view_pickabook_detail.dart';
 import './search_class_manager.dart';
-import 'search.dart';
 
 // SearchBodyWidget 정의
 class SearchBodyWidget extends StatefulWidget {
@@ -27,12 +26,36 @@ class SearchBodyWidget extends StatefulWidget {
 class _SearchBodyWidgetState extends State<SearchBodyWidget> {
   List<String> _imagePath = [];
 
-  void _changeImage(int index) {
+  void _increaseLikeCount(String documentId) async {
+    try {
+      await widget.webtoonCollection.doc(documentId).update({
+        'likeCount': FieldValue.increment(1),
+      });
+      print('Like count updated successfully');
+    } catch (e) {
+      print('Failed to update like count: $e');
+    }
+  }
+
+  void _decreaseLikeCount(String documentId) async {
+    try {
+      await widget.webtoonCollection.doc(documentId).update({
+        'likeCount': FieldValue.increment(-1),
+      });
+      print('Like count updated successfully');
+    } catch (e) {
+      print('Failed to update like count: $e');
+    }
+  }
+
+  void _changeImage(int index, String documentId) {
     setState(() {
       if (index >= 0 && index < _imagePath.length) {
         if (_imagePath[index] == 'assets/icons/like.png') {
+          _increaseLikeCount(documentId);
           _imagePath[index] = 'assets/icons/Component 3.png'; // 클릭 후 변경될 이미지 경로
         } else {
+          _decreaseLikeCount(documentId);
           _imagePath[index] = 'assets/icons/like.png'; // 클릭 후 원래 이미지로 되돌리기
         }
       } else {
@@ -228,7 +251,7 @@ class _SearchBodyWidgetState extends State<SearchBodyWidget> {
                     return WebtoonItem(
                       webtoonId: documentSnapshot.id,
                       documentSnapshot: documentSnapshot,
-                      onImageTap: () => _changeImage(index), // 익명 함수를 사용하여 함수 참조 전달
+                      onImageTap: () => _changeImage(index, documentSnapshot.id), // 익명 함수를 사용하여 함수 참조 전달
                       imagePath: _imagePath[index],
                     );
                   },
@@ -369,7 +392,7 @@ class _SearchBodyWidgetState extends State<SearchBodyWidget> {
                     final DocumentSnapshot documentSnapshot = filteredDocs[index];
                     return PickaBookItem(
                       documentSnapshot: documentSnapshot,
-                      onImageTap: () => _changeImage(index), // 익명 함수를 사용하여 함수 참조 전달
+                      onImageTap: () => _changeImage(index, documentSnapshot.id), // 익명 함수를 사용하여 함수 참조 전달
                       imagePath: _imagePath[index],
                     );
                   },

@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'changePassword_page.dart';
+import '../log_in/login_page.dart';
 
 class SettingsPage extends StatefulWidget {
-  // 사용자 정보 (실제 앱에서는 서버에서 받아오거나 로컬에 저장된 데이터를 사용)
   final String username;
   final String email;
 
@@ -15,6 +16,8 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance; // 여기로 이동
+
   // 사용자 프로필 사진을 저장하는 변수
   XFile? _profileImage;
 
@@ -25,6 +28,17 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() {
       _profileImage = image;
     });
+  }
+
+  Future signOut() async {
+    try {
+      print('sign out complete');
+      return await _auth.signOut();
+    } catch (e) {
+      print('sign out failed');
+      print(e.toString());
+      return null;
+    }
   }
 
   // 비밀번호 변경 페이지로 이동하는 함수
@@ -80,7 +94,13 @@ class _SettingsPageState extends State<SettingsPage> {
             TextButton(
               child: Text('로그아웃'),
               onPressed: () {
-                Navigator.of(context).pop();
+                signOut();
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()), // LoginPage로 이동
+                      (route) => false, // 이전 페이지 스택을 모두 제거
+                );
+
               },
             ),
           ],
@@ -179,4 +199,3 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 }
-

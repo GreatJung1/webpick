@@ -91,6 +91,7 @@ flutter:
     - assets/icons/Group 55.png
     - assets/icons/Rectangle_grey.png
     - assets/icons/google.png
+    - assets/icons/banner.png
 
 
   # The following line ensures that the Material Icons font is

@@ -38,10 +38,12 @@ class _LoginPageState extends State<LoginPage> {
       });
 
       // 로그인 성공 시 메인 페이지로 이동
-      Navigator.push(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const DefaultWidget()),
+            (route) => false,  // 이 부분에서 모든 이전 화면을 제거
       );
+
     } catch (e) {
       print('로그인 실패: $e');
       ScaffoldMessenger.of(context).showSnackBar(

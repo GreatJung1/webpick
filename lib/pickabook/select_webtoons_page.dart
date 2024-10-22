@@ -11,15 +11,19 @@ class SelectWebtoonsPage extends StatefulWidget {
 }
 
 class _SelectWebtoonsPageState extends State<SelectWebtoonsPage> {
-  final CollectionReference _webtoonCollection = FirebaseFirestore.instance.collection('webtoons');
+  final CollectionReference _webtoonCollection = FirebaseFirestore.instance.collection('webtoonDB');
   List<String> _selectedWebtoons = [];
 
   void _saveSelectedWebtoons() async {
     if (_selectedWebtoons.isNotEmpty) {
       try {
-        await FirebaseFirestore.instance.collection('pickabooks').doc(widget.pickaBookId).update({
+        // 문서가 존재하지 않으면 새로 생성
+        await FirebaseFirestore.instance
+            .collection('pickabookDB')
+            .doc(widget.pickaBookId)
+            .set({
           'webtoons': _selectedWebtoons,
-        });
+        }, SetOptions(merge: true)); // merge 옵션을 사용해 기존 필드와 병합
 
         Navigator.pop(context); // 저장 후 이전 화면으로 돌아감
       } catch (e) {
@@ -66,6 +70,9 @@ class _SelectWebtoonsPageState extends State<SelectWebtoonsPage> {
             itemBuilder: (context, index) {
               var webtoon = webtoons[index].data() as Map<String, dynamic>;
               var webtoonId = webtoons[index].id;
+
+              print("Webtoon ID: $webtoonId, Selected: ${_selectedWebtoons.contains(webtoonId)}");
+
               return CheckboxListTile(
                 title: Text(webtoon['title'] ?? '제목 없음'),
                 subtitle: Text('${webtoon['writer']} - ${webtoon['platform']}'),
@@ -74,9 +81,12 @@ class _SelectWebtoonsPageState extends State<SelectWebtoonsPage> {
                   setState(() {
                     if (value == true) {
                       _selectedWebtoons.add(webtoonId);
+                      print('Added $webtoonId');
                     } else {
                       _selectedWebtoons.remove(webtoonId);
+                      print('Removed $webtoonId');
                     }
+                    print('Selected Webtoons: $_selectedWebtoons');
                   });
                 },
               );

@@ -8,8 +8,9 @@ class PickABook {
   String coverImage = 'assets/icons/Naver_Line_Webtoon_logo.png';
   final String title;
   bool isPublic;
+  int likes; // 좋아요 필드 추가
 
-  PickABook({this.coverImage = 'assets/icons/Naver_Line_Webtoon_logo.png', required this.title, this.isPublic = true});
+  PickABook({this.coverImage = 'assets/icons/Naver_Line_Webtoon_logo.png', required this.title, this.isPublic = true, this.likes = 0});
 }
 
 class PickABookPage extends StatefulWidget {
@@ -37,8 +38,16 @@ class _PickABookPageState extends State<PickABookPage> {
           title: data['title'] ?? '제목 없음',
           coverImage: data['coverImage'] ?? 'assets/icons/Rectangle_grey.png',
           isPublic: data['isPublic'] ?? true,
+          likes: data['likes'] ?? 0, // Firestore에서 좋아요 값 가져오기
         );
       }).toList();
+    });
+  }
+
+  // 좋아요 수 업데이트 메소드
+  Future<void> _updateLikeCount(String documentId, int currentLikes) async {
+    await _pickABookCollection.doc(documentId).update({
+      'likes': currentLikes + 1, // 좋아요 수 증가
     });
   }
 
@@ -50,6 +59,7 @@ class _PickABookPageState extends State<PickABookPage> {
       ),
     );
   }
+
   void _editPickABook(String documentId, PickABook book) {
     Navigator.push(
       context,
@@ -94,8 +104,6 @@ class _PickABookPageState extends State<PickABookPage> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -130,14 +138,12 @@ class _PickABookPageState extends State<PickABookPage> {
               mainAxisSpacing: 30,
               childAspectRatio: 3 / 5,
             ),
-            itemCount: pickABooks.length + 1, // 새로 만들기 버튼 포함
+            itemCount: pickaBooks.length + 1, // 새로 만들기 버튼 포함
             itemBuilder: (context, index) {
-              if (index == pickABooks.length) {
+              if (index == pickaBooks.length) {
                 return GestureDetector(
-                  onTap:() {
-                    _createPickABook();
-                  },
-                    child: Container(
+                  onTap: _createPickABook,
+                  child: Container(
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.black, width: 1),
                       borderRadius: BorderRadius.circular(8),
@@ -159,6 +165,7 @@ class _PickABookPageState extends State<PickABookPage> {
                 title: pickaBookData['title'] ?? '제목 없음',
                 coverImage: pickaBookData['coverImage'] ?? 'assets/icons/Rectangle_grey.png',
                 isPublic: pickaBookData['isPublic'] ?? true,
+                likes: pickaBookData['likes'] ?? 0,
               );
 
               return GestureDetector(
@@ -169,7 +176,7 @@ class _PickABookPageState extends State<PickABookPage> {
                       builder: (context) => PickABookWebtoonPage(
                         webtoon: Webtoon(
                           title: pickABook.title,
-                          coverImageUrl: 'assets/icons/Rectangle_grey.png',
+                          coverImageUrl: pickABook.coverImage,
                         ),
                       ),
                     ),
@@ -201,6 +208,18 @@ class _PickABookPageState extends State<PickABookPage> {
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
+                        ),
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.favorite_border),
+                              color: Colors.red,
+                              onPressed: () async {
+                                await _updateLikeCount(documentId, pickABook.likes);
+                              },
+                            ),
+                            Text('${pickABook.likes}'),
+                          ],
                         ),
                         PopupMenuButton<String>(
                           onSelected: (value) {

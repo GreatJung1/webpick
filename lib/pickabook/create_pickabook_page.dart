@@ -33,11 +33,12 @@ class _CreatePickaBookPageState extends State<CreatePickaBookPage> {
     if (title.isNotEmpty) {
       try {
         // Firestore에 새로운 PickaBook 생성
-        DocumentReference docRef = await FirebaseFirestore.instance.collection('pickabooks').add({
+        DocumentReference docRef = await FirebaseFirestore.instance.collection('pickabookDB').add({
           'title': title,
           'coverImage': _coverImage, // 선택된 표지 이미지 저장
           'isPublic': _isPublic, // 공개 여부 저장
           'createdAt': DateTime.now(),
+          'likes' : 0,
           'webtoons': [], // 초기에는 웹툰이 없는 빈 배열로 설정
         });
 

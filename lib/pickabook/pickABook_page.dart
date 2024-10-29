@@ -5,12 +5,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'create_pickabook_page.dart';
 
 class PickABook {
-  String coverImage = 'assets/icons/Naver_Line_Webtoon_logo.png';
+  String coverImage = 'assets/icons/Component 4.png';
   final String title;
   bool isPublic;
   int likes; // 좋아요 필드 추가
 
-  PickABook({this.coverImage = 'assets/icons/Naver_Line_Webtoon_logo.png', required this.title, this.isPublic = true, this.likes = 0});
+  PickABook({
+    this.coverImage = 'assets/icons/Component 4.png',
+    required this.title,
+    this.isPublic = true,
+    this.likes = 0});
 }
 
 class PickABookPage extends StatefulWidget {
@@ -203,8 +207,8 @@ class _PickABookPageState extends State<PickABookPage> {
                           child: Text(
                             pickABook.title,
                             style: TextStyle(
+                              fontFamily: 'Pretendard-Light.otf',
                               fontSize: 16,
-                              fontWeight: FontWeight.bold,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),

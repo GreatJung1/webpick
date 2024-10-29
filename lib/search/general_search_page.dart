@@ -3,18 +3,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import './view_webtoon_detail.dart';
 import './view_pickabook_detail.dart';
 import './search_class_manager.dart';
+import 'search.dart';
 
 // SearchBodyWidget 정의
 class SearchBodyWidget extends StatefulWidget {
   final TextEditingController searchController;
   final String searchQuery;
   final CollectionReference webtoonCollection;
+  final CollectionReference pickabookCollection;
   final void Function(String) onSearchChange;
 
   SearchBodyWidget({
     required this.searchController,
     required this.searchQuery,
     required this.webtoonCollection,
+    required this.pickabookCollection,
     required this.onSearchChange,
   });
 
@@ -24,45 +27,37 @@ class SearchBodyWidget extends StatefulWidget {
 
 // SearchBodyWidget의 상태를 관리하는 클래스
 class _SearchBodyWidgetState extends State<SearchBodyWidget> {
-  List<String> _imagePath = [];
+  List<String> _imagePath_w = []; // 첫 번째 리스트
+  List<String> _imagePath_p = [];  // 두 번째 리스트
 
-  void _increaseLikeCount(String documentId) async {
-    try {
-      await widget.webtoonCollection.doc(documentId).update({
-        'likeCount': FieldValue.increment(1),
-      });
-      print('Like count updated successfully');
-    } catch (e) {
-      print('Failed to update like count: $e');
-    }
-  }
-
-  void _decreaseLikeCount(String documentId) async {
-    try {
-      await widget.webtoonCollection.doc(documentId).update({
-        'likeCount': FieldValue.increment(-1),
-      });
-      print('Like count updated successfully');
-    } catch (e) {
-      print('Failed to update like count: $e');
-    }
-  }
-
-  void _changeImage(int index, String documentId) {
+  void _changeImage_w(int index) {
     setState(() {
-      if (index >= 0 && index < _imagePath.length) {
-        if (_imagePath[index] == 'assets/icons/like.png') {
-          _increaseLikeCount(documentId);
-          _imagePath[index] = 'assets/icons/Component 3.png'; // 클릭 후 변경될 이미지 경로
+      if (index >= 0 && index < _imagePath_w.length) {
+        if (_imagePath_w[index] == 'assets/icons/like.png') {
+          _imagePath_w[index] = 'assets/icons/Component 3.png'; // 클릭 후 변경될 이미지 경로
         } else {
-          _decreaseLikeCount(documentId);
-          _imagePath[index] = 'assets/icons/like.png'; // 클릭 후 원래 이미지로 되돌리기
+          _imagePath_w[index] = 'assets/icons/like.png'; // 클릭 후 원래 이미지로 되돌리기
         }
       } else {
         print('Index out of range');
       }
     });
   }
+
+  void _changeImage_p(int index) {
+    setState(() {
+      if (index >= 0 && index < _imagePath_p.length) {
+        if (_imagePath_p[index] == 'assets/icons/like.png') {
+          _imagePath_p[index] = 'assets/icons/Component 3.png'; // 클릭 후 변경될 이미지 경로
+        } else {
+          _imagePath_p[index] = 'assets/icons/like.png'; // 클릭 후 원래 이미지로 되돌리기
+        }
+      } else {
+        print('Index out of range');
+      }
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -144,8 +139,8 @@ class _SearchBodyWidgetState extends State<SearchBodyWidget> {
                           writer.contains(widget.searchQuery.toLowerCase());
                     }).toList();
 
-                    while (_imagePath.length <= filteredDocs.length) {
-                      _imagePath.add('assets/icons/like.png');
+                    while (_imagePath_w.length <= filteredDocs.length) {
+                      _imagePath_w.add('assets/icons/like.png');
                     }
 
                     return Text(
@@ -251,8 +246,8 @@ class _SearchBodyWidgetState extends State<SearchBodyWidget> {
                     return WebtoonItem(
                       webtoonId: documentSnapshot.id,
                       documentSnapshot: documentSnapshot,
-                      onImageTap: () => _changeImage(index, documentSnapshot.id), // 익명 함수를 사용하여 함수 참조 전달
-                      imagePath: _imagePath[index],
+                      onImageTap: () => _changeImage_w(index), // 익명 함수를 사용하여 함수 참조 전달
+                      imagePath: _imagePath_w[index],
                     );
                   },
                   physics: NeverScrollableScrollPhysics(), // 스크롤 비활성화
@@ -281,15 +276,21 @@ class _SearchBodyWidgetState extends State<SearchBodyWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               StreamBuilder<QuerySnapshot>(
-                stream: widget.webtoonCollection.snapshots(),
+                stream: widget.pickabookCollection.snapshots(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
                   if (streamSnapshot.hasData) {
                     final filteredDocs = streamSnapshot.data!.docs.where((doc) {
                       final title = doc['title'].toString().toLowerCase();
-                      final writer = doc['writer'].toString().toLowerCase();
-                      return title.contains(widget.searchQuery.toLowerCase()) ||
-                          writer.contains(widget.searchQuery.toLowerCase());
+
+                      final searchQuery = widget.searchQuery.toLowerCase();
+
+                      // title 또는 배열 'tag' 중 하나라도 검색어를 포함하는지 확인
+                      return title.contains(searchQuery);
                     }).toList();
+
+                    while (_imagePath_p.length <= filteredDocs.length) {
+                      _imagePath_p.add('assets/icons/like.png');
+                    }
 
                     return Text(
                       '피카북 (${filteredDocs.length})',
@@ -346,14 +347,15 @@ class _SearchBodyWidgetState extends State<SearchBodyWidget> {
         ),
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
-            stream: widget.webtoonCollection.snapshots(),
+            stream: widget.pickabookCollection.snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
               if (streamSnapshot.hasData) {
                 final filteredDocs = streamSnapshot.data!.docs.where((doc) {
                   final title = doc['title'].toString().toLowerCase();
-                  final writer = doc['writer'].toString().toLowerCase();
-                  return title.contains(widget.searchQuery.toLowerCase()) ||
-                      writer.contains(widget.searchQuery.toLowerCase());
+                  final searchQuery = widget.searchQuery.toLowerCase();
+
+                  // title 또는 배열 'tag' 중 하나라도 검색어를 포함하는지 확인
+                  return title.contains(searchQuery);
                 }).toList();
 
                 if (filteredDocs.isEmpty) {
@@ -392,8 +394,8 @@ class _SearchBodyWidgetState extends State<SearchBodyWidget> {
                     final DocumentSnapshot documentSnapshot = filteredDocs[index];
                     return PickaBookItem(
                       documentSnapshot: documentSnapshot,
-                      onImageTap: () => _changeImage(index, documentSnapshot.id), // 익명 함수를 사용하여 함수 참조 전달
-                      imagePath: _imagePath[index],
+                      onImageTap: () => _changeImage_p(index), // 익명 함수를 사용하여 함수 참조 전달
+                      imagePath: _imagePath_p[index],
                     );
                   },
                 );

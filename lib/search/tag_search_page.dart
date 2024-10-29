@@ -5,10 +5,12 @@ import './search_class_manager.dart';
 
 class GenreWebtoonPage extends StatefulWidget {
   final CollectionReference webtoonCollection;
+  final CollectionReference pickabookCollection;
   final List<String> genres;
 
   GenreWebtoonPage({
     required this.webtoonCollection,
+    required this.pickabookCollection,
     required this.genres,
   });
 
@@ -390,8 +392,11 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
   }
 
   Widget _buildWebtoonGrid() {
+
+    // isitmore 값에 따라 stream을 다르게 설정
+    final stream = isitmore ? widget.pickabookCollection.snapshots() : widget.webtoonCollection.snapshots();
     return StreamBuilder<QuerySnapshot>(
-      stream: widget.webtoonCollection.snapshots(),
+      stream: stream,
       builder: (context, streamSnapshot) {
         if (streamSnapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -405,15 +410,25 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
           return Center(child: Text('데이터 없음'));
         }
 
-        // 데이터 필터링
+        // isitmore에 따라 다른 데이터 필터링 적용
         final filteredDocs = streamSnapshot.data!.docs.where((doc) {
-          final genre = doc['genre']?.toString().toLowerCase() ?? '';
-          final platform = doc['platform']?.toString().toLowerCase() ?? '';
+          if (isitmore) {
+            // Pickabook 데이터 필터링
+            final title = doc['title']?.toString().toLowerCase() ?? '';
 
-          return (_selectedGenres.isEmpty || _selectedGenres.contains('전체') ||
-              _selectedGenres.any((selectedGenre) => genre.toLowerCase().contains(selectedGenre.toLowerCase()))) &&
-              (_selectedPlatform == '전체' || platform == _selectedPlatform.toLowerCase());
+            return (_selectedGenres.isEmpty || _selectedGenres.contains('전체') ||
+                _selectedGenres.any((selectedGenre) => title.toLowerCase().contains(selectedGenre.toLowerCase())));
+          } else {
+            // Webtoon 데이터 필터링
+            final genre = doc['genre']?.toString().toLowerCase() ?? '';
+            final platform = doc['platform']?.toString().toLowerCase() ?? '';
+
+            return (_selectedGenres.isEmpty || _selectedGenres.contains('전체') ||
+                _selectedGenres.any((selectedGenre) => genre.toLowerCase().contains(selectedGenre.toLowerCase()))) &&
+                (_selectedPlatform == '전체' || platform == _selectedPlatform.toLowerCase());
+          }
         }).toList();
+
 
         while (_imagePath.length <= filteredDocs.length) {
           _imagePath.add('assets/icons/like.png');
@@ -423,10 +438,17 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
           itemCount: filteredDocs.length,
           itemBuilder: (context, index) {
             final DocumentSnapshot documentSnapshot = filteredDocs[index];
-            return WebtoonItem(
+            // isitmore 값에 따라 다른 위젯 반환
+            return isitmore
+                ? PickaBookItem(
+              documentSnapshot: documentSnapshot,
+              onImageTap: () => _changeImage(index),
+              imagePath: _imagePath[index],
+            )
+                : WebtoonItem(
               webtoonId: documentSnapshot.id,
               documentSnapshot: documentSnapshot,
-              onImageTap: () => _changeImage(index), // 익명 함수를 사용하여 함수 참조 전달
+              onImageTap: () => _changeImage(index),
               imagePath: _imagePath[index],
             );
           },

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../individual_webtoon_detail/individual_webtoon_detail_page.dart';
 import './search_class_manager.dart';
 
 class ViewPickabookDetailPage extends StatefulWidget {
   final CollectionReference pickabookCollection = FirebaseFirestore.instance
-      .collection("webtoonDB"); //pickabook으로 변경해야..
+      .collection("pickabookDB"); //pickabook으로 변경해야..
   final String searchQuery;
 
   ViewPickabookDetailPage({required this.searchQuery});
@@ -15,7 +14,7 @@ class ViewPickabookDetailPage extends StatefulWidget {
 }
 
 class _ViewPickabookDetailPage extends State<ViewPickabookDetailPage> {
-  final CollectionReference webtoonCollection = FirebaseFirestore.instance.collection("webtoonDB");
+  final CollectionReference pickabookCollection = FirebaseFirestore.instance.collection("pickabookDB");
   List<String> _imagePath = [];
 
   void _changeImage(int index) {
@@ -68,9 +67,7 @@ class _ViewPickabookDetailPage extends State<ViewPickabookDetailPage> {
                 if (streamSnapshot.hasData) {
                   final filteredDocs = streamSnapshot.data!.docs.where((doc) {
                     final title = doc['title'].toString().toLowerCase();
-                    final writer = doc['writer'].toString().toLowerCase();
-                    return title.contains(widget.searchQuery.toLowerCase()) ||
-                        writer.contains(widget.searchQuery.toLowerCase());
+                    return title.contains(widget.searchQuery.toLowerCase());
                   }).toList();
 
                   return Text(
@@ -110,9 +107,7 @@ class _ViewPickabookDetailPage extends State<ViewPickabookDetailPage> {
                 if (streamSnapshot.hasData) {
                   final filteredDocs = streamSnapshot.data!.docs.where((doc) {
                     final title = doc['title'].toString().toLowerCase();
-                    final writer = doc['writer'].toString().toLowerCase();
-                    return title.contains(widget.searchQuery.toLowerCase()) ||
-                        writer.contains(widget.searchQuery.toLowerCase());
+                    return title.contains(widget.searchQuery.toLowerCase());
                   }).toList();
 
                   while (_imagePath.length <= filteredDocs.length) {

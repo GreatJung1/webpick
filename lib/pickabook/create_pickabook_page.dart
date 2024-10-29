@@ -11,7 +11,7 @@ class CreatePickaBookPage extends StatefulWidget {
 
 class _CreatePickaBookPageState extends State<CreatePickaBookPage> {
   final TextEditingController _titleController = TextEditingController();
-  String _coverImage = 'assets/icons/Naver_Line_Webtoon_logo.png'; // 기본 표지 이미지
+  String _coverImage = 'assets/icons/Component 4.png'; // 기본 표지 이미지
   bool _isPublic = true; // 기본적으로 공개 설정
   final ImagePicker _picker = ImagePicker();
 
@@ -84,14 +84,14 @@ class _CreatePickaBookPageState extends State<CreatePickaBookPage> {
                 height: 150,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: _coverImage.startsWith('assets/')
+                    image: _coverImage.startsWith('assets/icons/Component 4.png')
                         ? AssetImage(_coverImage)
                         : FileImage(File(_coverImage)) as ImageProvider,
                     fit: BoxFit.cover,
                   ),
                   border: Border.all(color: Colors.black),
                 ),
-                child: _coverImage.startsWith('assets/')
+                child: _coverImage.startsWith('assets/icons/Component 4.png')
                     ? null
                     : Icon(Icons.edit, color: Colors.white),
               ),

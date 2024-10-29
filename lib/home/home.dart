@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../individual_webtoon_detail/individual_webtoon_detail_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,11 +32,21 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('웹툰 목록'),
+        title: Text('Webpick'),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        titleTextStyle: TextStyle(
+          fontFamily: 'EF_cucumbersalad',
+          color: Color(0xFF222831),
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
@@ -57,7 +68,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-            SizedBox(height: 4),
+            SizedBox(height: 6),
             SectionTitle(title: '좋아요 많은 웹툰'),
             WebtoonGrid(
               webtoonCollection: FirebaseFirestore.instance
@@ -65,23 +76,45 @@ class _HomePageState extends State<HomePage> {
                   .orderBy('likeCount', descending: true),
             ),
 
-            SizedBox(height: 4),
+            SizedBox(height: 16),
             SectionTitle(title: 'Pick a Book에 많이 들어간 웹툰'),
             WebtoonGrid(
               webtoonCollection: FirebaseFirestore.instance
                   .collection('webtoonDB')
-                  .orderBy('pickCount', descending: true),
+                  .orderBy('pickednum', descending: true),
             ),
 
-            SizedBox(height: 4),
+            SizedBox(height: 16),
             SectionTitle(title: '좋아요 많은 Pick a Book'),
             PickABookList(), // 임의로 고정된 리스트
 
             SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                height: 80,
+                width: 400,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  image: const DecorationImage(
+                    image: AssetImage('assets/icons/mini banner.png'), // 광고 이미지 경로
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(height: 16),
             SectionTitle(title: '# 추천 태그'),
             TagsGrid(), // 임의로 고정된 태그 리스트
 
-            SizedBox(height: 4),
+            SizedBox(height: 20),
             SectionTitle(title: 'AI 웹툰 추천'),
             WebtoonGrid(
               webtoonCollection: FirebaseFirestore.instance
@@ -89,11 +122,11 @@ class _HomePageState extends State<HomePage> {
                   .where('aiRecommended', isEqualTo: true),
             ),
 
-            SizedBox(height: 4),
+            SizedBox(height: 16),
             SectionTitle(title: 'AI Pick a Book 추천'),
             PickABookList(),
 
-            SizedBox(height: 20),
+            SizedBox(height: 30),
           ],
         ),
       ),
@@ -110,14 +143,14 @@ class SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 16.0,
-          fontFamily: 'Pretendard',
-          fontWeight: FontWeight.w500,
-          color: Color(0xFF222831),
+            fontSize: 16.0, // 텍스트 크기 설정
+            fontFamily: 'Pretendard',
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF222831)
         ),
       ),
     );
@@ -135,7 +168,7 @@ class WebtoonGrid extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: SizedBox(
-        height: 120,
+        height: 194,
         child: StreamBuilder<QuerySnapshot>(
           stream: webtoonCollection.snapshots(),
           builder: (context, streamSnapshot) {
@@ -166,7 +199,7 @@ class WebtoonGrid extends StatelessWidget {
                   platformImage: doc['platform']?.toString().toLowerCase() == '카카오'
                       ? 'assets/icons/Kakao.png'
                       : 'assets/icons/Naver.png',
-                  imageUrl: 'assets/icons/like.png',
+                  imageUrl: 'assets/icons/Rectangle_grey.png',
                 );
               },
             );
@@ -177,25 +210,70 @@ class WebtoonGrid extends StatelessWidget {
   }
 }
 
-// 픽카북 리스트 위젯
+
 class PickABookList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: SizedBox(
-        height: 120,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: 5,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Container(
-                width: 80,
-                color: Colors.grey[300],
-                child: Icon(Icons.book, size: 40, color: Colors.grey[700]),
-              ),
+        height: 194,
+        child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('pickabookDB')
+              .orderBy('likes', descending: true)
+              .limit(5) // 상위 5개
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return Center(child: CircularProgressIndicator());
+            }
+
+            final docs = snapshot.data!.docs;
+
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: docs.length,
+              itemBuilder: (context, index) {
+                final doc = docs[index];
+                String title = doc['title'] ?? '제목 없음';
+
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(8.0, 10.0, 2.0, 10.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 150,
+                        width: 100,
+                        color: Colors.grey[300],
+                        child: Icon(
+                          Icons.book,
+                          size: 40,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      SizedBox(
+                        width: 100,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(4.0, 2.0, 3.0, 0.0),
+                          child: Text(
+                            title,
+                            style: TextStyle(
+                              fontSize: 15.0,
+                              fontFamily: 'Pretendard',
+                              fontWeight: FontWeight.w400,
+                              color: Colors.grey.shade700,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             );
           },
         ),
@@ -204,12 +282,14 @@ class PickABookList extends StatelessWidget {
   }
 }
 
+
+
 // 태그 그리드 위젯
 class TagsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('tagDB')
@@ -274,7 +354,7 @@ class WebtoonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+      padding: EdgeInsets.fromLTRB(8.0, 10.0, 2.0, 10.0),
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -289,33 +369,30 @@ class WebtoonCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                Container(
-                  width: 100,
-                  height: 73,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage(imageUrl),
-                      fit: BoxFit.cover,
-                    ),
+            SizedBox(
+              width: 100,
+              height: 150,
+              child: Image.asset(
+                imageUrl,
+                fit: BoxFit.cover,
+              ),
+            ),
+            SizedBox(
+              width: 100, // 너비를 150으로 제한
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(4.0, 2.0, 3.0, 0.0), // 여백 설정
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 15.0,
+                    fontFamily: 'Pretendard',
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey.shade700,
                   ),
+                  overflow: TextOverflow.ellipsis, // 말줄임표(...) 설정
+                  maxLines: 1, // 최대 1줄까지만 표시
                 ),
-                Positioned(
-                  bottom: 10,
-                  right: 10,
-                  child: Container(
-                    width: 16,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage(platformImage),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ),
@@ -324,6 +401,7 @@ class WebtoonCard extends StatelessWidget {
   }
 }
 
+/*
 // 웹툰 상세 페이지 (예시로 추가)
 class IndividualWebtoonDetailPage extends StatelessWidget {
   final String webtoonId;
@@ -342,3 +420,4 @@ class IndividualWebtoonDetailPage extends StatelessWidget {
     );
   }
 }
+ */

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../individual_webtoon_detail/individual_webtoon_detail_page.dart';
+import '../pickabook/create_pickabook_page.dart';
 
 
 
@@ -132,13 +133,24 @@ class _PickaBookMakeWidgetState extends State<PickaBookMakeWidget> {
             children: [
               Container(
                 alignment: Alignment.centerRight,
-                child: Text(
-                  '+ 새로 만들기',
-                  style: TextStyle(
-                    color: Color(0xFF76ABAE),
-                    fontFamily: 'Pretendard',
-                    fontWeight: FontWeight.w500,
-                    fontSize: 12,
+                child: GestureDetector(
+                  onTap: () {
+                    // CreatePickaBookPage로 이동
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreatePickaBookPage(), // 이동할 페이지
+                      ),
+                    );
+                  },
+                  child: Text(
+                    '+ 새로 만들기',
+                    style: TextStyle(
+                      color: Color(0xFF76ABAE),
+                      fontFamily: 'Pretendard',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),
@@ -490,7 +502,7 @@ class PickaBookItem extends StatelessWidget {
                               ),
                               child: Center(
                                 child: Text(
-                                  '# ${documentSnapshot['writer']}',
+                                  '# ${(documentSnapshot['tag'] != null && documentSnapshot['tag'].isNotEmpty) ? documentSnapshot['tag'][0] : ' '}',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'Pretendard',
@@ -512,7 +524,7 @@ class PickaBookItem extends StatelessWidget {
                               ),
                               child: Center(
                                 child: Text(
-                                  '# ${documentSnapshot['writer']}',
+                                  '# ${(documentSnapshot['tag'] != null && documentSnapshot['tag'].length > 1) ? documentSnapshot['tag'][1] : ' '}',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'Pretendard',
@@ -534,7 +546,7 @@ class PickaBookItem extends StatelessWidget {
                               ),
                               child: Center(
                                 child: Text(
-                                  '# ${documentSnapshot['writer']}',
+                                  '# ${(documentSnapshot['tag'] != null && documentSnapshot['tag'].length > 2) ? documentSnapshot['tag'][2] : ' ' }',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'Pretendard',

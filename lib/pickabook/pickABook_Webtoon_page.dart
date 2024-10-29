@@ -1,4 +1,3 @@
-
 /*import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:homework/Pick_A_Book/select_webtoons_page.dart';
@@ -221,27 +220,36 @@ class _PickABookWebtoonPageState extends State<PickABookWebtoonPage> {
         itemCount: _webtoons.length,
         itemBuilder: (context, index) {
           final webtoon = _webtoons[index];
-          return ListTile(
-            leading: Stack(
-              children: [
-                Image.asset(  ////asset을 network로 고치면 URL과 연결됨
-                  webtoon.coverImageUrl,
-                  width: 50,
-                  height: 75,
-                ),
-                if (webtoon.isSelected)
-                  Positioned(
-                    right: 0,
-                    child: Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                    ),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0), // 웹툰 제목 간의 간격
+            child: ListTile(
+              leading: Stack(
+                children: [
+                  Image.asset(
+                    webtoon.coverImageUrl,
+                    width: 100,
+                    height: 150,
                   ),
-              ],
+                  if (webtoon.isSelected)
+                    Positioned(
+                      right: 0,
+                      child: Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                      ),
+                    ),
+                ],
+              ),
+              title: Text(
+                webtoon.title,
+                style: TextStyle(
+                  fontSize: 18, // 글씨 크기 설정// 글씨 두께 설정
+                ),
+              ),
+              contentPadding: EdgeInsets.symmetric(horizontal: 16.0), // 간격 설정
+              onTap: _isSelectionMode ? () => _toggleSelection(webtoon) : null,
+              selected: webtoon.isSelected,
             ),
-            title: Text(webtoon.title),
-            onTap: _isSelectionMode ? () => _toggleSelection(webtoon) : null,
-            selected: webtoon.isSelected,
           );
         },
       ),

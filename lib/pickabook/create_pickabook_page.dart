@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'select_webtoons_page.dart';
+import 'select_tags_page.dart';
 
+// CreatePickaBookPage 클래스 정의 복원
 class CreatePickaBookPage extends StatefulWidget {
   @override
   _CreatePickaBookPageState createState() => _CreatePickaBookPageState();
@@ -14,7 +16,6 @@ class _CreatePickaBookPageState extends State<CreatePickaBookPage> {
   String _coverImage = 'assets/icons/Naver_Line_Webtoon_logo.png'; // 기본 표지 이미지
   bool _isPublic = true; // 기본적으로 공개 설정
   final ImagePicker _picker = ImagePicker();
-
 
   // 이미지 선택 함수
   Future<void> _pickImage() async {
@@ -33,24 +34,26 @@ class _CreatePickaBookPageState extends State<CreatePickaBookPage> {
     if (title.isNotEmpty) {
       try {
         // Firestore에 새로운 PickaBook 생성
-        DocumentReference docRef = await FirebaseFirestore.instance.collection('pickabooks').add({
+        DocumentReference docRef = await FirebaseFirestore.instance.collection('pickabookDB').add({
           'title': title,
           'coverImage': _coverImage, // 선택된 표지 이미지 저장
           'isPublic': _isPublic, // 공개 여부 저장
           'createdAt': DateTime.now(),
+          'likes': 0,
           'webtoons': [], // 초기에는 웹툰이 없는 빈 배열로 설정
+          'tags': [], // 초기에는 태그가 없는 빈 배열로 설정
         });
 
         print('PickaBook created with ID: ${docRef.id}');
 
-        // 생성된 '픽카북'의 ID를 웹툰 선택 페이지로 전달
+        // 태그 선택 페이지로 이동
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SelectWebtoonsPage(pickaBookId: docRef.id),
+            builder: (context) => SelectTagsPage(pickaBookId: docRef.id),
           ),
         ).then((_) {
-          Navigator.pop(context); // 웹툰 선택이 끝나면 홈 화면으로 돌아갑니다.
+          Navigator.pop(context); // 태그 및 웹툰 선택이 끝나면 홈 화면으로 돌아갑니다.
         });
       } catch (e) {
         print('Error creating PickaBook: $e');
@@ -64,6 +67,7 @@ class _CreatePickaBookPageState extends State<CreatePickaBookPage> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -128,6 +132,54 @@ class _CreatePickaBookPageState extends State<CreatePickaBookPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class PickaBookListPage extends StatelessWidget { // 기존의 픽카북 목록 페이지
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('픽카북 목록'),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('pickabookDB')
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('오류가 발생했습니다.'));
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return Center(child: Text('픽카북 데이터가 없습니다.'));
+          }
+
+          final pickaBooks = snapshot.data!.docs;
+
+          return ListView.builder(
+            itemCount: pickaBooks.length,
+            itemBuilder: (context, index) {
+              final pickaBook = pickaBooks[index];
+              final title = pickaBook['title'] ?? '제목 없음';
+              final coverImage = pickaBook['coverImage'] ?? 'assets/icons/default_cover.png';
+
+              return ListTile(
+                leading: Image.asset(
+                  coverImage.startsWith('assets/') ? coverImage : 'assets/icons/default_cover.png',
+                  width: 50,
+                  height: 50,
+                ),
+                title: Text(title),
+              );
+            },
+          );
+        },
       ),
     );
   }

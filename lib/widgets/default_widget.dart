@@ -26,7 +26,7 @@ class _DefaultWidgetState extends State<DefaultWidget> {
     List<Widget> _widgetOptions = <Widget>[
       SearchBarPage(),
       Collection(),
-      SearchPage(),
+      HomePage(),
       PickABookPage(),
       MyPage(),
     ];

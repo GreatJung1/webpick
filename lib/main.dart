@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue.shade900),
         useMaterial3: true,
       ),
-      home: LoginPage(), // DefaultWidget을 home으로 설정
+      home: DefaultWidget(), // DefaultWidget을 home으로 설정
     );
   }
 }

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../individual_webtoon_detail/individual_webtoon_detail_page.dart';
+import './search_class_manager.dart';
 
 class GenreWebtoonPage extends StatefulWidget {
   final CollectionReference webtoonCollection;
+  final CollectionReference pickabookCollection;
   final List<String> genres;
 
   GenreWebtoonPage({
     required this.webtoonCollection,
+    required this.pickabookCollection,
     required this.genres,
   });
 
@@ -16,11 +19,12 @@ class GenreWebtoonPage extends StatefulWidget {
 }
 
 class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
-  String _selectedGenre = '전체'; // 초기 선택된 장르
+  List<String> _selectedGenres = []; // 선택된 장르 목록
+  //String _selectedGenre = '전체'; // 초기 선택된 장르
   String _selectedPlatform = '전체'; // 초기 선택된 플랫폼
   List<String> _tags = [];
   bool isitmore = false; //false는 웹툰 true는 피카북
-  String _imagePath = 'assets/icons/like.png';
+  List<String> _imagePath = [];
 
   @override
   void initState() {
@@ -37,18 +41,22 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
 
   void _resetFilters() {
     setState(() {
-      _selectedGenre = '전체';
+      _selectedGenres = [];
+      //_selectedGenre = '전체';
       _selectedPlatform = '전체';
     });
   }
 
-  void _changeImage() {
+  void _changeImage(int index) {
     setState(() {
-      // 클릭 시 이미지 경로를 변경
-      if (_imagePath == 'assets/icons/like.png') {
-        _imagePath =  'assets/icons/fillheart.png'; // 클릭 후 변경될 이미지 경로
+      if (index >= 0 && index < _imagePath.length) {
+        if (_imagePath[index] == 'assets/icons/like.png') {
+          _imagePath[index] = 'assets/icons/Component 3.png'; // 클릭 후 변경될 이미지 경로
+        } else {
+          _imagePath[index] = 'assets/icons/like.png'; // 클릭 후 원래 이미지로 되돌리기
+        }
       } else {
-        _imagePath = 'assets/icons/like.png'; // 클릭 후 원래 이미지로 되돌리기
+        print('Index out of range');
       }
     });
   }
@@ -94,255 +102,195 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
                 scrollDirection: Axis.horizontal,
                 child:Column(
                     crossAxisAlignment: CrossAxisAlignment.start, // Column 내의 요소들을 왼쪽으로 정렬
-                children: [
-                Row(
-                  children: [
-                    Container(
-                      color: Colors.grey.shade200, // 배경색 설정
-                      width: 160,
-                      height: 40,
-                      alignment: Alignment.center, // 상하 좌우 중앙 정렬
-                      child: Text(
-                        '장르',
-                        style: TextStyle(
-                          color: Color(0xFF222831), // 텍스트 색상 설정
-                          fontFamily: 'Pretendard', // 폰트 패밀리 설정
-                          fontWeight: FontWeight.w700, // 폰트 굵기 설정
-                          fontSize: 16.0, // 폰트 크기 설정
-                        ),
-                      ),
-                    ),
-                    for (var genre in widget.genres.take(13))
-                      Container(
-                        height: 40,
-                        margin: EdgeInsets.symmetric(horizontal: 4.0), // 좌우 마진
-                        child: TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _selectedGenre = genre;
-                            });
-                          },
-                          style: TextButton.styleFrom(
-                            //backgroundColor: _selectedGenre == genre ? Color(0xFF76ABAE) : Colors.transparent,
-                            foregroundColor: _selectedGenre == genre ? Color(0xFF76ABAE) : Colors.grey, // 텍스트 색상 변경
-
-                          ),
-                          child: Text(
-                            genre,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: 'Pretendard',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                  Container(
-                    height: 0.5,
-                    //width: double.infinity,
-                    color: Colors.grey,
-                  ),
-                Row(
-                  children: [
-                    Container(
-                      color: Colors.grey.shade200, // 배경색 설정
-                      width: 160,
-                      height: 40,
-                      alignment: Alignment.center, // 상하 좌우 중앙 정렬
-                      child: Text(
-                        '소재/배경',
-                        style: TextStyle(
-                          color: Color(0xFF222831), // 텍스트 색상 설정
-                          fontFamily: 'Pretendard', // 폰트 패밀리 설정
-                          fontWeight: FontWeight.w700, // 폰트 굵기 설정
-                          fontSize: 16.0, // 폰트 크기 설정
-                        ),
-                      ),
-                    ),
-                    for (var genre in widget.genres.sublist(13, 16))
-                      Container(
-                        height: 40,
-                        margin: EdgeInsets.symmetric(horizontal: 4.0), // 좌우 마진
-                        child: TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _selectedGenre = genre;
-                            });
-                          },
-                          style: TextButton.styleFrom(
-                            //backgroundColor: _selectedGenre == genre ? Color(0xFF76ABAE) : Colors.transparent,
-                            foregroundColor: _selectedGenre == genre ? Color(0xFF76ABAE) : Colors.grey, // 텍스트 색상 변경
-
-                          ),
-                          child: Text(
-                            genre,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: 'Pretendard',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                  Container(
-                    height: 0.5,
-                    color: Colors.grey,
-                  ),
-                  Row(
                     children: [
-                      Container(
-                        color: Colors.grey.shade200, // 배경색 설정
-                        width: 160,
-                        height: 40,
-                        alignment: Alignment.center, // 상하 좌우 중앙 정렬
-                        child: Text(
-                          '주인공',
-                          style: TextStyle(
-                            color: Color(0xFF222831), // 텍스트 색상 설정
-                            fontFamily: 'Pretendard', // 폰트 패밀리 설정
-                            fontWeight: FontWeight.w700, // 폰트 굵기 설정
-                            fontSize: 16.0, // 폰트 크기 설정
-                          ),
-                        ),
-                      ),
-                      for (var genre in widget.genres.sublist(16, 20))
-                        Container(
-                          height: 40,
-                          margin: EdgeInsets.symmetric(horizontal: 4.0), // 좌우 마진
-                          child: TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _selectedGenre = genre;
-                              });
-                            },
-                            style: TextButton.styleFrom(
-                              //backgroundColor: _selectedGenre == genre ? Color(0xFF76ABAE) : Colors.transparent,
-                              foregroundColor: _selectedGenre == genre ? Color(0xFF76ABAE) : Colors.grey, // 텍스트 색상 변경
-
-                            ),
+                      Row(
+                        children: [
+                          Container(
+                            color: Colors.grey.shade200, // 배경색 설정
+                            width: 160,
+                            height: 40,
+                            alignment: Alignment.center, // 상하 좌우 중앙 정렬
                             child: Text(
-                              genre,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
+                              '장르',
                               style: TextStyle(
-                                fontFamily: 'Pretendard',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16.0,
+                                color: Color(0xFF222831), // 텍스트 색상 설정
+                                fontFamily: 'Pretendard', // 폰트 패밀리 설정
+                                fontWeight: FontWeight.w700, // 폰트 굵기 설정
+                                fontSize: 16.0, // 폰트 크기 설정
                               ),
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                  Container(
-                    height: 0.5,
-                    color: Colors.grey,
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        color: Colors.grey.shade200, // 배경색 설정
-                        width: 160,
-                        height: 40,
-                        alignment: Alignment.center, // 상하 좌우 중앙 정렬
-                        child: Text(
-                          '작화',
-                          style: TextStyle(
-                            color: Color(0xFF222831), // 텍스트 색상 설정
-                            fontFamily: 'Pretendard', // 폰트 패밀리 설정
-                            fontWeight: FontWeight.w700, // 폰트 굵기 설정
-                            fontSize: 16.0, // 폰트 크기 설정
-                          ),
-                        ),
-                      ),
-                      for (var genre in widget.genres.sublist(20, 25))
-                        Container(
-                          height: 40,
-                          margin: EdgeInsets.symmetric(horizontal: 4.0), // 좌우 마진
-                          child: TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _selectedGenre = genre;
-                              });
-                            },
-                            style: TextButton.styleFrom(
-                              //backgroundColor: _selectedGenre == genre ? Color(0xFF76ABAE) : Colors.transparent,
-                              foregroundColor: _selectedGenre == genre ? Color(0xFF76ABAE) : Colors.grey, // 텍스트 색상 변경
-
+                          for (var genre in widget.genres.take(13))
+                            GenreSelectionButton(
+                              genre: genre,
+                              isSelected: _selectedGenres.contains(genre),
+                              isMaxSelection: _selectedGenres.length == 3 && isitmore,
+                              onGenreSelected: (selectedGenre) {
+                                setState(() {
+                                  if (_selectedGenres.contains(selectedGenre)) {
+                                    _selectedGenres.remove(selectedGenre);
+                                  } else {
+                                    _selectedGenres.add(selectedGenre);
+                                  }
+                                });
+                              },
                             ),
+                        ],
+                      ),
+                      Container(
+                        height: 0.5,
+                        //width: double.infinity,
+                        color: Colors.grey,
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            color: Colors.grey.shade200, // 배경색 설정
+                            width: 160,
+                            height: 40,
+                            alignment: Alignment.center, // 상하 좌우 중앙 정렬
                             child: Text(
-                              genre,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
+                              '소재/배경',
                               style: TextStyle(
-                                fontFamily: 'Pretendard',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16.0,
+                                color: Color(0xFF222831), // 텍스트 색상 설정
+                                fontFamily: 'Pretendard', // 폰트 패밀리 설정
+                                fontWeight: FontWeight.w700, // 폰트 굵기 설정
+                                fontSize: 16.0, // 폰트 크기 설정
                               ),
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                  Container(
-                    height: 0.5,
-                    color: Colors.grey,
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        color: Colors.grey.shade200, // 배경색 설정
-                        width: 160,
-                        height: 40,
-                        alignment: Alignment.center, // 상하 좌우 중앙 정렬
-                        child: Text(
-                          '기타',
-                          style: TextStyle(
-                            color: Color(0xFF222831), // 텍스트 색상 설정
-                            fontFamily: 'Pretendard', // 폰트 패밀리 설정
-                            fontWeight: FontWeight.w700, // 폰트 굵기 설정
-                            fontSize: 16.0, // 폰트 크기 설정
-                          ),
-                        ),
-                      ),
-                      for (var genre in widget.genres.sublist(25))
-                        Container(
-                          height: 40,
-                          margin: EdgeInsets.symmetric(horizontal: 4.0), // 좌우 마진
-                          child: TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _selectedGenre = genre;
-                              });
-                            },
-                            style: TextButton.styleFrom(
-                              //backgroundColor: _selectedGenre == genre ? Color(0xFF76ABAE) : Colors.transparent,
-                              foregroundColor: _selectedGenre == genre ? Color(0xFF76ABAE) : Colors.grey, // 텍스트 색상 변경
-
+                          for (var genre in widget.genres.sublist(13, 16))
+                            GenreSelectionButton(
+                              genre: genre,
+                              isSelected: _selectedGenres.contains(genre),
+                              isMaxSelection: _selectedGenres.length == 3 && isitmore,
+                              onGenreSelected: (selectedGenre) {
+                                setState(() {
+                                  if (_selectedGenres.contains(selectedGenre)) {
+                                    _selectedGenres.remove(selectedGenre);
+                                  } else {
+                                    _selectedGenres.add(selectedGenre);
+                                  }
+                                });
+                              },
                             ),
+                        ],
+                      ),
+                      Container(
+                        height: 0.5,
+                        color: Colors.grey,
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            color: Colors.grey.shade200, // 배경색 설정
+                            width: 160,
+                            height: 40,
+                            alignment: Alignment.center, // 상하 좌우 중앙 정렬
                             child: Text(
-                              genre,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
+                              '주인공',
                               style: TextStyle(
-                                fontFamily: 'Pretendard',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16.0,
+                                color: Color(0xFF222831), // 텍스트 색상 설정
+                                fontFamily: 'Pretendard', // 폰트 패밀리 설정
+                                fontWeight: FontWeight.w700, // 폰트 굵기 설정
+                                fontSize: 16.0, // 폰트 크기 설정
                               ),
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                  ]
+                          for (var genre in widget.genres.sublist(16, 20))
+                            GenreSelectionButton(
+                              genre: genre,
+                              isSelected: _selectedGenres.contains(genre),
+                              isMaxSelection: _selectedGenres.length == 3 && isitmore,
+                              onGenreSelected: (selectedGenre) {
+                                setState(() {
+                                  if (_selectedGenres.contains(selectedGenre)) {
+                                    _selectedGenres.remove(selectedGenre);
+                                  } else {
+                                    _selectedGenres.add(selectedGenre);
+                                  }
+                                });
+                              },
+                            ),
+                        ],
+                      ),
+                      Container(
+                        height: 0.5,
+                        color: Colors.grey,
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            color: Colors.grey.shade200, // 배경색 설정
+                            width: 160,
+                            height: 40,
+                            alignment: Alignment.center, // 상하 좌우 중앙 정렬
+                            child: Text(
+                              '작화',
+                              style: TextStyle(
+                                color: Color(0xFF222831), // 텍스트 색상 설정
+                                fontFamily: 'Pretendard', // 폰트 패밀리 설정
+                                fontWeight: FontWeight.w700, // 폰트 굵기 설정
+                                fontSize: 16.0, // 폰트 크기 설정
+                              ),
+                            ),
+                          ),
+                          for (var genre in widget.genres.sublist(20, 25))
+                            GenreSelectionButton(
+                              genre: genre,
+                              isSelected: _selectedGenres.contains(genre),
+                              isMaxSelection: _selectedGenres.length == 3 && isitmore,
+                              onGenreSelected: (selectedGenre) {
+                                setState(() {
+                                  if (_selectedGenres.contains(selectedGenre)) {
+                                    _selectedGenres.remove(selectedGenre);
+                                  } else {
+                                    _selectedGenres.add(selectedGenre);
+                                  }
+                                });
+                              },
+                            ),
+                        ],
+                      ),
+                      Container(
+                        height: 0.5,
+                        color: Colors.grey,
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            color: Colors.grey.shade200, // 배경색 설정
+                            width: 160,
+                            height: 40,
+                            alignment: Alignment.center, // 상하 좌우 중앙 정렬
+                            child: Text(
+                              '기타',
+                              style: TextStyle(
+                                color: Color(0xFF222831), // 텍스트 색상 설정
+                                fontFamily: 'Pretendard', // 폰트 패밀리 설정
+                                fontWeight: FontWeight.w700, // 폰트 굵기 설정
+                                fontSize: 16.0, // 폰트 크기 설정
+                              ),
+                            ),
+                          ),
+                          for (var genre in widget.genres.sublist(25))
+                            GenreSelectionButton(
+                              genre: genre,
+                              isSelected: _selectedGenres.contains(genre),
+                              isMaxSelection: _selectedGenres.length == 3 && isitmore,
+                              onGenreSelected: (selectedGenre) {
+                                setState(() {
+                                  if (_selectedGenres.contains(selectedGenre)) {
+                                    _selectedGenres.remove(selectedGenre);
+                                  } else {
+                                    _selectedGenres.add(selectedGenre);
+                                  }
+                                });
+                              },
+                            ),
+                        ],
+                      ),
+                    ]
                 ),
               ),
             ),
@@ -400,6 +348,7 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
                   if (newValue != null) {
                     setState(() {
                       isitmore = newValue;
+                      _selectedGenres=[];
                     });
                   }
                 },
@@ -423,10 +372,18 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
               onSelected: (bool selected) {
 
                 setState(() {
-                  _selectedGenre = selected ? tag : '전체';
+                  if (selected) {
+                    if (!_selectedGenres.contains(tag)) {
+                      // 선택된 경우 리스트에 추가
+                      _selectedGenres.add(tag);
+                    }
+                  } else {
+                    // 선택 해제된 경우 리스트에서 제거
+                    _selectedGenres.remove(tag);
+                  }
                 });
               },
-              selected: _selectedGenre == tag,
+              selected: _selectedGenres.contains(tag), // 리스트에 포함 여부로 선택 상태 확인
             ),
           );
         }).toList(),
@@ -435,8 +392,11 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
   }
 
   Widget _buildWebtoonGrid() {
+
+    // isitmore 값에 따라 stream을 다르게 설정
+    final stream = isitmore ? widget.pickabookCollection.snapshots() : widget.webtoonCollection.snapshots();
     return StreamBuilder<QuerySnapshot>(
-      stream: widget.webtoonCollection.snapshots(),
+      stream: stream,
       builder: (context, streamSnapshot) {
         if (streamSnapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -450,277 +410,46 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
           return Center(child: Text('데이터 없음'));
         }
 
-        // 데이터 필터링
+        // isitmore에 따라 다른 데이터 필터링 적용
         final filteredDocs = streamSnapshot.data!.docs.where((doc) {
-          final genre = doc['genre']?.toString().toLowerCase() ?? '';
-          final platform = doc['platform']?.toString().toLowerCase() ?? '';
+          if (isitmore) {
+            // Pickabook 데이터 필터링
+            final title = doc['title']?.toString().toLowerCase() ?? '';
 
-          return (_selectedGenre == '전체' || genre.contains(_selectedGenre.toLowerCase())) &&
-              (_selectedPlatform == '전체' || platform == _selectedPlatform.toLowerCase());
+            return (_selectedGenres.isEmpty || _selectedGenres.contains('전체') ||
+                _selectedGenres.any((selectedGenre) => title.toLowerCase().contains(selectedGenre.toLowerCase())));
+          } else {
+            // Webtoon 데이터 필터링
+            final genre = doc['genre']?.toString().toLowerCase() ?? '';
+            final platform = doc['platform']?.toString().toLowerCase() ?? '';
+
+            return (_selectedGenres.isEmpty || _selectedGenres.contains('전체') ||
+                _selectedGenres.any((selectedGenre) => genre.toLowerCase().contains(selectedGenre.toLowerCase()))) &&
+                (_selectedPlatform == '전체' || platform == _selectedPlatform.toLowerCase());
+          }
         }).toList();
+
+
+        while (_imagePath.length <= filteredDocs.length) {
+          _imagePath.add('assets/icons/like.png');
+        }
 
         return ListView.builder(
           itemCount: filteredDocs.length,
           itemBuilder: (context, index) {
             final DocumentSnapshot documentSnapshot = filteredDocs[index];
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 4.0),
-              child: Material(
-                color: Colors.white,
-                child: Column(
-                  children: [
-                    // 기존 Row 위젯
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center, // 상하 중앙 정렬
-                      children: [
-                        // 사진 부분
-                        Stack(
-                          children: [
-                            Container(
-                              width: 80, // 원하는 사진의 너비
-                              height: 80, // 원하는 사진의 높이
-                              margin: EdgeInsets.only(left: 18.0, right: 18.0, top: 10.0, bottom: 10.0),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8), // 모서리 둥글게 설정
-                                image: DecorationImage(
-                                  image: AssetImage('assets/icons/Naver_Line_Webtoon_logo.png'),
-                                  fit: BoxFit.cover, // 사진이 박스에 맞게 채워지도록 설정
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 10,
-                              right: 10,
-                              child: Container(
-                                width: 14, // 아이콘의 너비
-                                height: 14, // 아이콘의 높이
-                                decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                    image: AssetImage(
-                                        documentSnapshot['platform']?.toString().toLowerCase() == '카카오'
-                                            ? 'assets/icons/Kakao.png'
-                                            : 'assets/icons/Naver.png'
-                                    ),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        // 글 리스트 부분
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  documentSnapshot['title'],
-                                  style: TextStyle(
-                                    color: Color(0xFF222831),
-                                    fontFamily: 'Pretendard',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 19,
-                                  ),
-                                ),
-                                SizedBox(height: 5),
-                                Text(
-                                  '${documentSnapshot['writer']}',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontFamily: 'Pretendard',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                Text(
-                                  documentSnapshot['end']
-                                      ? '${documentSnapshot['genre']} ${documentSnapshot['episode']}화 완결'
-                                      : '${documentSnapshot['genre']} ${documentSnapshot['episode']}화 ${documentSnapshot['weekday']}요일',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontFamily: 'Pretendard',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        InkWell(
-                          onTap: _changeImage,
-                          child: Container(
-                            width: 23, // 첫 번째 이미지의 너비
-                            height: 20,
-                            margin: EdgeInsets.all(10), // 이미지와 텍스트 간의 간격 조정
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: AssetImage(_imagePath), // 첫 번째 이미지 경로
-                                fit: BoxFit.cover, // 사진이 박스에 맞게 채워지도록 설정
-                              ),
-                            ),
-                          ),
-                        ),
-                        // 두 번째 이미지
-                        InkWell(
-                          onTap: () {
-                            showModalBottomSheet(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return Container(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min, // 콘텐츠에 맞게 크기 조정
-                                    children: <Widget>[
-                                      Column(
-                                        children: [
-                                          Container(
-                                            alignment: Alignment.centerRight,
-                                            child: Text(
-                                              '+ 새로 만들기',
-                                              style: TextStyle(
-                                                  color: Color(0xFF76ABAE),
-                                                fontFamily: 'Pretendard',
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Row(
-                                            crossAxisAlignment: CrossAxisAlignment.center, // 상하 중앙 정렬
-                                            children: [
-                                              Container(
-                                                width: 30, // 박스의 너비
-                                                height: 30, // 박스의 높이
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(8), // 모서리 둥글게 설정
-                                                  image: DecorationImage(
-                                                    image: AssetImage('assets/icons/Group 43.png'), // 이미지 경로
-                                                    fit: BoxFit.cover, // 이미지가 박스를 꽉 채우도록 설정
-                                                  ),
-                                                ),
-                                              ),
-                                              Text('   내가 좋아요 한 웹툰',
-                                                  style: TextStyle(
-                                                    color: Color(0xFF222831),
-                                                    fontFamily: 'Pretendard',
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 16,
-                                                  )
-                                              ),
-                                              Spacer(),
-                                              Container(
-                                                margin: EdgeInsets.only(right: 10.0),
-                                                width: 30, // 박스의 너비
-                                                height: 30, // 박스의 높이
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(8), // 모서리 둥글게 설정
-                                                  image: DecorationImage(
-                                                    image: AssetImage('assets/icons/Lock.png'), // 이미지 경로
-                                                    //fit: BoxFit.cover, // 이미지가 박스를 꽉 채우도록 설정
-                                                  ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Container(
-                                            height: 0.5,
-                                            color: Colors.grey,
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Row(
-                                            children: [
-                                              Container(
-                                                width: 30, // 박스의 너비
-                                                height: 30, // 박스의 높이
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(8), // 모서리 둥글게 설정
-                                                  image: DecorationImage(
-                                                    image: AssetImage('assets/icons/Group 43.png'), // 이미지 경로
-                                                    fit: BoxFit.cover, // 이미지가 박스를 꽉 채우도록 설정
-                                                  ),
-                                                ),
-                                              ),
-                                              Text('   내가 좋아요 한 웹툰',
-                                                  style: TextStyle(
-                                                    color: Color(0xFF222831),
-                                                    fontFamily: 'Pretendard',
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 16,
-                                                  )
-                                              ),
-                                              Spacer(),
-                                              Container(
-                                                margin: EdgeInsets.only(right: 10.0),
-                                                width: 30, // 박스의 너비
-                                                height: 30, // 박스의 높이
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(8), // 모서리 둥글게 설정
-                                                  image: DecorationImage(
-                                                    image: AssetImage('assets/icons/Lock.png'), // 이미지 경로
-                                                    //fit: BoxFit.cover, // 이미지가 박스를 꽉 채우도록 설정
-                                                  ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                          SizedBox(
-                                            height: 12,
-                                          ),
-                                          TextButton(
-                                            child: Text('Pick a Book에 추가하기',
-                                                style: TextStyle(
-                                                  color: Color(0xFF76ABAE),
-                                                  fontFamily: 'Pretendard',
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 16,
-                                                )
-                                            ),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                        ]
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                          child: Container(
-                            width: 24, // 첫 번째 이미지의 너비
-                            height: 17, // 첫 번째 이미지의 높이
-                            margin: EdgeInsets.only(left: 10.0, right: 20.0),
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: AssetImage('assets/icons/box.png'), // 첫 번째 이미지 경로
-                                fit: BoxFit.cover, // 사진이 박스에 맞게 채워지도록 설정
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    // 새로운 요소 추가
-                    Container(
-                      height: 0.5,
-                      width: double.infinity,
-                      color: Colors.grey,
-                    ),
-                  ],
-                ),
-              ),
+            // isitmore 값에 따라 다른 위젯 반환
+            return isitmore
+                ? PickaBookItem(
+              documentSnapshot: documentSnapshot,
+              onImageTap: () => _changeImage(index),
+              imagePath: _imagePath[index],
+            )
+                : WebtoonItem(
+              webtoonId: documentSnapshot.id,
+              documentSnapshot: documentSnapshot,
+              onImageTap: () => _changeImage(index),
+              imagePath: _imagePath[index],
             );
           },
         );

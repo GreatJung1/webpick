@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../individual_webtoon_detail/individual_webtoon_detail_page.dart';
+import './collection_class_manager.dart';
 
 class GenreWebtoonPage extends StatefulWidget {
   final CollectionReference webtoonCollection;
@@ -210,31 +211,31 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
                     });
                     print('Circle button pressed');
                   },
-                child: Container(
-                  width: 16.0, // 버튼의 너비
-                  height: 16.0, // 버튼의 높이
-                  decoration: BoxDecoration(
-                  shape: BoxShape.circle, // 원형 모양으로 설정
-                  color: Colors.transparent, // 배경색을 투명으로 설정
-                  border: Border.all( // 테두리 설정
-                    color: Colors.grey, // 테두리 색상
-                  width: 0.5, // 테두리 두께
-                ),
-              ),
-              child: Stack(
-                alignment: Alignment.center, // Stack 안의 아이템을 가운데 정렬
-                children: [
-                  if (isPressed) // 클릭 상태일 때만 작은 원을 추가
-                    Container(
-                      width: 8.0, // 작은 원의 너비
-                      height: 8.0, // 작은 원의 높이
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle, // 원형 모양으로 설정
-                        color: Colors.grey, // 작은 원의 색상
+                  child: Container(
+                    width: 16.0, // 버튼의 너비
+                    height: 16.0, // 버튼의 높이
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle, // 원형 모양으로 설정
+                      color: Colors.transparent, // 배경색을 투명으로 설정
+                      border: Border.all( // 테두리 설정
+                        color: Colors.grey, // 테두리 색상
+                        width: 0.5, // 테두리 두께
                       ),
                     ),
-                  ],
-                ),
+                    child: Stack(
+                      alignment: Alignment.center, // Stack 안의 아이템을 가운데 정렬
+                      children: [
+                        if (isPressed) // 클릭 상태일 때만 작은 원을 추가
+                          Container(
+                            width: 8.0, // 작은 원의 너비
+                            height: 8.0, // 작은 원의 높이
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle, // 원형 모양으로 설정
+                              color: Colors.grey, // 작은 원의 색상
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -248,10 +249,10 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
                       child: Text(number.toString(),
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontFamily: 'Pretendard',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16.0,
-                          color: Colors.grey
+                            fontFamily: 'Pretendard',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16.0,
+                            color: Colors.grey
                         ),
                       ),
                     );
@@ -343,17 +344,17 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
                 height: 40,
                 padding: EdgeInsets.only(left: 6.0),
                 alignment: Alignment.center,
-                  child: Text(
-                    "휴재 제외",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontFamily: 'Pretendard',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16.0,
-                        color: Colors.grey
-                    ),
+                child: Text(
+                  "휴재 제외",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16.0,
+                      color: Colors.grey
                   ),
                 ),
+              ),
               // 완결 제외 버튼
               Padding(
                 padding: EdgeInsets.only(left: 16.0),
@@ -396,18 +397,21 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
                 height: 40,
                 padding: EdgeInsets.only(right: 20.0, left: 6.0),
                 alignment: Alignment.center,
-                  child: Text(
-                    "완결 제외",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontFamily: 'Pretendard',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16.0,
-                        color: Colors.grey
-                    ),
+                child: Text(
+                  "완결 제외",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16.0,
+                      color: Colors.grey
                   ),
                 ),
+              ),
             ],
+          ),
+          SizedBox(
+            height: 30,
           ),
 
           // 웹툰 항목들
@@ -467,71 +471,13 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
                     final doc = filteredDocs[index];
                     String title = doc['title'] ?? '제목 없음';
 
-                    return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => IndividualWebtoonDetailPage(
-                                webtoonId: doc.id,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
-                          children: [
-                            Stack(
-                              children: [
-                                Container(
-                                  width: 120,  // 직접 크기 지정
-                                  height: 80,
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: AssetImage('assets/icons/Naver_Line_Webtoon_logo.png'),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 10,
-                                  right: 10,
-                                  child: Container(
-                                    width: 16, // 아이콘의 너비
-                                    height: 16, // 아이콘의 높이
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image: doc['platform']?.toString().toLowerCase() == '카카오'
-                                            ? AssetImage('assets/icons/Kakao.png')
-                                            : AssetImage('assets/icons/Naver.png'),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 8), // 이미지와 제목 간의 간격
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                              child: Text(
-                                title,
-                                style: TextStyle(
-                                  fontSize: 18.0, // 텍스트 크기 설정
-                                  fontFamily: 'Pretendard',
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF222831),
-                                ),
-                                overflow: TextOverflow.ellipsis, // 줄임표 설정
-                                maxLines: 1, // 최대 줄 수 설정
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    return WebtoonCard(
+                      title: title,
+                      webtoonId: doc.id,
+                      platformImage: doc['platform']?.toString().toLowerCase() == '카카오'
+                          ? 'assets/icons/Kakao.png'
+                          : 'assets/icons/Naver.png',
+                      imageUrl: 'assets/icons/like.png',
                     );
                   },
                 );

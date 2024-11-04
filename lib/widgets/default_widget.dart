@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../search/search.dart';
 import '../collection/collection.dart';
-import '../home/home_test.dart';
+import '../home/home.dart';
 import '../pickabook/pickABook_page.dart';
 import '../my_page/my_page.dart';
 

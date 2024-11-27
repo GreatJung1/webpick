@@ -44,14 +44,15 @@ class _HomePageState extends State<HomePage> {
       ),
       body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start, //start
           children: [
             SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.all(8.0),
+              child: AspectRatio(
+                aspectRatio: 1.0,  // 1.0은 높이와 너비를 같게 설정
               child: Container(
-                height: 400,
-                width: 400,
+                width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   image: const DecorationImage(
@@ -60,12 +61,13 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 child: Align(
-                  alignment: Alignment.bottomLeft,
+                  alignment: Alignment.center, //bottomLeft,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                   ),
                 ),
               ),
+            ),
             ),
 
             SizedBox(height: 6),
@@ -91,9 +93,10 @@ class _HomePageState extends State<HomePage> {
             SizedBox(height: 4),
             Padding(
               padding: const EdgeInsets.all(8.0),
+              child: AspectRatio(
+                aspectRatio: 4/1,  // 1.0은 높이와 너비를 같게 설정
               child: Container(
-                height: 80,
-                width: 400,
+                width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   image: const DecorationImage(
@@ -102,12 +105,13 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 child: Align(
-                  alignment: Alignment.bottomLeft,
+                  alignment: Alignment.center, //bottomLeft
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                   ),
                 ),
               ),
+            ),
             ),
 
             SizedBox(height: 16),

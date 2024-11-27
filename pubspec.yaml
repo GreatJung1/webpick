@@ -70,11 +70,28 @@ flutter:
       fonts:
         - asset: assets/fonts/Pretendard-Light.otf
           weight: 300 # 가벼운 폰트 두께를 지정
-    - family: EF_cucumbersalad
+    - family: Salad
       fonts:
         - asset: assets/fonts/EF_cucumbersalad(ttf).ttf
           weight: 300 # 가벼운 폰트 두께를 지정
   assets:
+    - assets/icons/Dell_duotone.png
+    - assets/icons/Search.png
+    - assets/icons/like.png
+    - assets/icons/box.png
+    - assets/icons/Naver_Line_Webtoon_logo.png
+    - assets/icons/Naver.png
+    - assets/icons/Kakao.png
+    - assets/icons/fillheart.png
+    - assets/icons/Padlock.png
+    - assets/icons/Component 2.png
+    - assets/icons/Component 3.png
+    - assets/icons/Lock.png
+    - assets/icons/Group 43.png
+    - assets/icons/Group 55.png
+    - assets/icons/Rectangle_grey.png
+    - assets/icons/google.png
+    - assets/icons/banner.png
     - assets/icons/
 
 

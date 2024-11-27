@@ -334,7 +334,7 @@ class _GenreWebtoonPageState extends State<GenreWebtoonPage> {
                   DropdownMenuItem<bool>(
                     value: true,
                     child: Text(
-                      '피카북',
+                      '픽카북',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontFamily: 'Pretendard',

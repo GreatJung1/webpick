@@ -1,9 +1,9 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import './view_webtoon_detail.dart';
 import './view_pickabook_detail.dart';
 import './search_class_manager.dart';
-import 'search.dart';
 
 // SearchBodyWidget 정의
 class SearchBodyWidget extends StatefulWidget {
@@ -29,6 +29,16 @@ class SearchBodyWidget extends StatefulWidget {
 class _SearchBodyWidgetState extends State<SearchBodyWidget> {
   List<String> _imagePath_w = []; // 첫 번째 리스트
   List<String> _imagePath_p = [];  // 두 번째 리스트
+
+  final firebaseStorage = FirebaseStorage.instance;
+  List<String> _imageUrls = [];
+
+  bool _isLoading= false;
+
+  List<String> get imageUrls => _imageUrls;
+  bool get isLoaing => _isLoading;
+
+
 
   void _changeImage_w(int index) {
     setState(() {
@@ -202,6 +212,7 @@ class _SearchBodyWidgetState extends State<SearchBodyWidget> {
             stream: widget.webtoonCollection.snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
               if (streamSnapshot.hasData) {
+
                 final filteredDocs = streamSnapshot.data!.docs.where((doc) {
                   final title = doc['title'].toString().toLowerCase();
                   final writer = doc['writer'].toString().toLowerCase();
@@ -243,11 +254,14 @@ class _SearchBodyWidgetState extends State<SearchBodyWidget> {
                   itemCount: filteredDocs.length > 3 ? 3 : filteredDocs.length,
                   itemBuilder: (context, index) {
                     final DocumentSnapshot documentSnapshot = filteredDocs[index];
+                    final imagePath = documentSnapshot['image']; // Firebase Storage URL
+                    print(imagePath);
+
                     return WebtoonItem(
                       webtoonId: documentSnapshot.id,
                       documentSnapshot: documentSnapshot,
-                      onImageTap: () => _changeImage_w(index), // 익명 함수를 사용하여 함수 참조 전달
-                      imagePath: _imagePath_w[index],
+                      onImageTap: () => _changeImage_w(index),
+                      imagePath: imagePath,  // 이미지를 전달
                     );
                   },
                   physics: NeverScrollableScrollPhysics(), // 스크롤 비활성화
@@ -260,6 +274,7 @@ class _SearchBodyWidgetState extends State<SearchBodyWidget> {
             },
           ),
         ),
+
         Container(
           height: 0.5,
           width: double.infinity,

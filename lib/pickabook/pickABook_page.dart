@@ -609,7 +609,7 @@ class _PickABookPageState extends State<PickABookPage> {
               );
 
               return GestureDetector(
-                onTap: () {
+                /*onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -621,7 +621,18 @@ class _PickABookPageState extends State<PickABookPage> {
                       ),
                     ),
                   );
+                },*/
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PickABookWebtoonPage(
+                        pickABookId: documentId, // PickABook 문서 ID를 전달
+                      ),
+                    ),
+                  );
                 },
+
                 child: Column(
                   children: [
                     AspectRatio(

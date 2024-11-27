@@ -1,105 +1,14 @@
-/*import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:homework/Pick_A_Book/select_webtoons_page.dart';
-
-import 'create_pickabook_page.dart'; // 파이어베이스 추가
-
-class PickABookWebtoonPage extends StatefulWidget {
-  @override
-  _PickABookPageState createState() => _PickABookPageState();
-}
-
-class _PickABookPageState extends State<PickABookPage> {
-  final CollectionReference _pickaBookCollection = FirebaseFirestore.instance.collection('pickabookDB');
-
-  void _deletePickABook(String pickaBookId) async {
-    try {
-      await _pickaBookCollection.doc(pickaBookId).delete();
-      print('픽카북 삭제됨: $pickaBookId');
-    } catch (e) {
-      print('픽카북 삭제 중 오류 발생: $e');
-    }
-  }
-
-  void _editPickABook(String pickaBookId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SelectWebtoonsPage(pickaBookId: pickaBookId), // 웹툰 선택 페이지로 이동
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('내 픽카북'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CreatePickaBookPage()), // 새 픽카북 생성 페이지로 이동
-              );
-            },
-          ),
-        ],
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _pickaBookCollection.snapshots(), // Firestore의 컬렉션의 실시간 스트림을 구독
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('데이터를 불러오는 중 오류가 발생했습니다.'));
-          } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('픽카북이 없습니다.'));
-          }
-
-          final pickaBooks = snapshot.data!.docs;
-
-          return ListView.builder(
-            itemCount: pickaBooks.length,
-            itemBuilder: (context, index) {
-              var pickaBook = pickaBooks[index].data() as Map<String, dynamic>;
-              var pickaBookId = pickaBooks[index].id;
-
-              return ListTile(
-                title: Text(pickaBook['title'] ?? '제목 없음'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: () => _editPickABook(pickaBookId), // 편집 버튼 클릭 시 동작
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () => _deletePickABook(pickaBookId), // 삭제 버튼 클릭 시 동작
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-*/
-
 import 'package:flutter/material.dart';
-import '../search/search.dart'; // 미리 만들어 놓은 검색 페이지 클래스
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Webtoon {
-  String title;
-  String coverImageUrl;
+  final String id;
+  final String title;
+  final String coverImageUrl;
   bool isSelected;
 
   Webtoon({
+    required this.id,
     required this.title,
     required this.coverImageUrl,
     this.isSelected = false,
@@ -107,93 +16,175 @@ class Webtoon {
 }
 
 class PickABookWebtoonPage extends StatefulWidget {
-  final Webtoon? webtoon; // 선택적 웹툰 매개변수
+  final String pickABookId; // PickABook 문서 ID
 
-  PickABookWebtoonPage({this.webtoon});
+  PickABookWebtoonPage({required this.pickABookId});
 
   @override
   _PickABookWebtoonPageState createState() => _PickABookWebtoonPageState();
 }
 
 class _PickABookWebtoonPageState extends State<PickABookWebtoonPage> {
-  List<Webtoon> _webtoons = [
-    Webtoon(title: '웹툰 1', coverImageUrl: 'assets/icons/Rectangle_grey.png'), //구현 확인 위해 이미지로 바꿔놓음 원래는 경로
-    Webtoon(title: '웹툰 2', coverImageUrl: 'assets/icons/Rectangle_grey.png'), //구현 확인 위해 이미지로 바꿔놓음 원래는 경로
-    // 추가 웹툰 데이터
-  ];
+  final CollectionReference _pickABookCollection =
+  FirebaseFirestore.instance.collection('pickabookDB');
+  final CollectionReference _webtoonCollection =
+  FirebaseFirestore.instance.collection('webtoonDB');
 
+  List<Webtoon> _webtoons = [];
+  List<Webtoon> _availableWebtoons = [];
+  bool _isLoading = true;
   bool _isSelectionMode = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.webtoon != null) {
-      // 전달받은 웹툰이 있으면 리스트에 추가
-      _webtoons.add(widget.webtoon!);
+    _fetchWebtoons();
+  }
+
+  // Firestore에서 웹툰 데이터 가져오기
+  Future<void> _fetchWebtoons() async {
+    try {
+      DocumentSnapshot pickABookSnapshot =
+      await _pickABookCollection.doc(widget.pickABookId).get();
+
+      if (pickABookSnapshot.exists) {
+        Map<String, dynamic>? pickABookData =
+        pickABookSnapshot.data() as Map<String, dynamic>?;
+
+        List<dynamic> selectedWebtoonIds = pickABookData?['webtoons'] ?? [];
+
+        List<Webtoon> selectedWebtoons = [];
+        List<Webtoon> availableWebtoons = [];
+
+        QuerySnapshot webtoonSnapshot = await _webtoonCollection.get();
+
+        for (var doc in webtoonSnapshot.docs) {
+          Map<String, dynamic> webtoonData =
+          doc.data() as Map<String, dynamic>;
+          String webtoonId = doc.id;
+
+          Webtoon webtoon = Webtoon(
+            id: webtoonId,
+            title: webtoonData['title'] ?? '제목 없음',
+            coverImageUrl: webtoonData['image'] ??
+                'assets/icons/Rectangle_grey.png', // 기본 이미지니까 여기 변경하면 될듯 소리
+          );
+
+          // 선택된 웹툰과 선택되지 않은 웹툰 분리
+          if (selectedWebtoonIds.contains(webtoonId)) {
+            selectedWebtoons.add(webtoon);
+          } else {
+            availableWebtoons.add(webtoon);
+          }
+        }
+
+        setState(() {
+          _webtoons = selectedWebtoons;
+          _availableWebtoons = availableWebtoons;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('웹툰 데이터를 불러오는 중 오류 발생: $e');
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
-  void _toggleSelection(Webtoon webtoon) {
+  // 선택된 웹툰 추가
+  void _addWebtoons(List<Webtoon> selectedWebtoons) async {
     setState(() {
-      webtoon.isSelected = !webtoon.isSelected;
+      _webtoons.addAll(selectedWebtoons);
+      _availableWebtoons.removeWhere(
+              (webtoon) => selectedWebtoons.contains(webtoon));
     });
+
+    // Firestore 업데이트
+    List<String> updatedWebtoonIds = _webtoons.map((webtoon) => webtoon.id).toList();
+    await _pickABookCollection
+        .doc(widget.pickABookId)
+        .update({'webtoons': updatedWebtoonIds});
   }
 
-  void _deleteSelectedWebtoons() {
+  // 웹툰 삭제
+  void _deleteSelectedWebtoons() async {
+    setState(() {
+      _webtoons.removeWhere((webtoon) => webtoon.isSelected);
+    });
+
+    // Firestore 업데이트
+    List<String> updatedWebtoonIds = _webtoons.map((webtoon) => webtoon.id).toList();
+    await _pickABookCollection
+        .doc(widget.pickABookId)
+        .update({'webtoons': updatedWebtoonIds});
+  }
+
+  // 추가 가능한 웹툰 선택 화면
+  void _showAvailableWebtoonsDialog() {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('삭제 확인'),
-          content: Text('선택한 웹툰을 삭제하시겠습니까?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _webtoons.removeWhere((webtoon) => webtoon.isSelected);
-                });
-                Navigator.of(context).pop(); // 다이얼로그 닫기
-              },
-              child: Text('삭제'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // 다이얼로그 닫기
-              },
-              child: Text('취소'),
-            ),
-          ],
+      builder: (context) {
+        List<Webtoon> selectedWebtoons = [];
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('웹툰 추가'),
+              content: Container(
+                width: double.maxFinite,
+                child: ListView.builder(
+                  itemCount: _availableWebtoons.length,
+                  itemBuilder: (context, index) {
+                    final webtoon = _availableWebtoons[index];
+                    return CheckboxListTile(
+                      title: Text(webtoon.title),
+                      value: webtoon.isSelected,
+                      onChanged: (isChecked) {
+                        setState(() {
+                          webtoon.isSelected = isChecked ?? false;
+                          if (isChecked == true) {
+                            selectedWebtoons.add(webtoon);
+                          } else {
+                            selectedWebtoons.remove(webtoon);
+                          }
+                        });
+                      },
+                    );
+                  },
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('취소'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _addWebtoons(selectedWebtoons);
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('추가'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
-  }
-
-  void _addWebtoon() async {
-    // 검색 페이지로 이동하여 새로운 웹툰 추가
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SearchBarPage(), // 미리 만들어 놓은 검색 페이지로 이동
-      ),
-    );
-
-    if (result != null && result is Webtoon) {
-      setState(() {
-        _webtoons.add(result); // 검색 페이지에서 반환된 웹툰 추가
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('웹툰 목록'),
+        title: Text('픽카북 웹툰 목록'),
         actions: [
           if (!_isSelectionMode)
             IconButton(
               icon: Icon(Icons.add),
-              onPressed: _addWebtoon,
+              onPressed: _showAvailableWebtoonsDialog,
             ),
           if (_isSelectionMode)
             IconButton(
@@ -206,7 +197,6 @@ class _PickABookWebtoonPageState extends State<PickABookWebtoonPage> {
               setState(() {
                 _isSelectionMode = !_isSelectionMode;
                 if (!_isSelectionMode) {
-                  // 선택 모드 해제 시 모든 선택 해제
                   _webtoons.forEach((webtoon) {
                     webtoon.isSelected = false;
                   });
@@ -216,43 +206,34 @@ class _PickABookWebtoonPageState extends State<PickABookWebtoonPage> {
           ),
         ],
       ),
-      body: ListView.builder(
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _webtoons.isEmpty
+          ? Center(child: Text('등록된 웹툰이 없습니다.'))
+          : ListView.builder(
         itemCount: _webtoons.length,
         itemBuilder: (context, index) {
           final webtoon = _webtoons[index];
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0), // 웹툰 제목 간의 간격
-            child: ListTile(
-              leading: Stack(
-                children: [
-                  Image.asset(
-                    webtoon.coverImageUrl,
-                    width: 100,
-                    height: 150,
-                  ),
-                  if (webtoon.isSelected)
-                    Positioned(
-                      right: 0,
-                      child: Icon(
-                        Icons.check_circle,
-                        color: Colors.green,
-                      ),
-                    ),
-                ],
-              ),
-              title: Text(
-                webtoon.title,
-                style: TextStyle(
-                  fontSize: 18, // 글씨 크기 설정// 글씨 두께 설정
-                ),
-              ),
-              contentPadding: EdgeInsets.symmetric(horizontal: 16.0), // 간격 설정
-              onTap: _isSelectionMode ? () => _toggleSelection(webtoon) : null,
-              selected: webtoon.isSelected,
+          return ListTile(
+            leading: Image.network(
+              webtoon.coverImageUrl,
+              width: 50,
+              height: 75,
+              fit: BoxFit.cover,
             ),
+            title: Text(webtoon.title),
+            onTap: _isSelectionMode
+                ? () {
+              setState(() {
+                webtoon.isSelected = !webtoon.isSelected;
+              });
+            }
+                : null,
+            selected: webtoon.isSelected,
           );
         },
       ),
     );
   }
 }
+

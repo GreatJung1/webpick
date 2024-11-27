@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../individual_webtoon_detail/individual_webtoon_detail_page.dart';
 import '../pickabook/create_pickabook_page.dart';
 
@@ -257,7 +258,7 @@ class _PickaBookMakeWidgetState extends State<PickaBookMakeWidget> {
 class WebtoonItem extends StatelessWidget {
   final DocumentSnapshot documentSnapshot;
   final Function() onImageTap;
-  final imagePath;
+  final String imagePath; // Firebase Storage 경로 (gs://)
   final String webtoonId;
 
   WebtoonItem({
@@ -265,8 +266,20 @@ class WebtoonItem extends StatelessWidget {
     required this.onImageTap,
     required this.imagePath,
     required this.webtoonId,
-
   });
+
+  // Firebase Storage에서 이미지 URL을 가져오는 비동기 함수
+  Future<String> _getImageUrl() async {
+    try {
+      // 'gs://' URL을 'https://' URL로 변환
+      final ref = FirebaseStorage.instance.ref().child(imagePath); // 'gs://' URL에서 'ref()'로 참조
+      String downloadUrl = await ref.getDownloadURL(); // HTTP(S) URL을 가져옴
+      return downloadUrl;
+    } catch (e) {
+      print("이미지 가져오기 오류: $e");
+      return ''; // 오류 발생 시 기본 URL 또는 빈 문자열 반환
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -276,9 +289,8 @@ class WebtoonItem extends StatelessWidget {
         color: Colors.white,
         child: Column(
           children: [
-            // 기존 Row 위젯
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center, // 상하 중앙 정렬
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 InkWell(
                   onTap: () {
@@ -286,37 +298,74 @@ class WebtoonItem extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => IndividualWebtoonDetailPage(
-                          webtoonId: webtoonId, // webtoonId 전달
+                          webtoonId: webtoonId,
                         ),
                       ),
                     );
                   },
                   child: Stack(
                     children: [
-                      Container(
-                        width: 80, // 원하는 사진의 너비
-                        height: 80, // 원하는 사진의 높이
-                        margin: EdgeInsets.only(left: 18.0, right: 18.0, top: 10.0, bottom: 10.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8), // 모서리 둥글게 설정
-                          image: DecorationImage(
-                            image: AssetImage('assets/icons/Naver_Line_Webtoon_logo.png'),
-                            fit: BoxFit.cover, // 사진이 박스에 맞게 채워지도록 설정
-                          ),
-                        ),
+                      // FutureBuilder로 이미지를 비동기적으로 가져오는 부분
+                      FutureBuilder<String>(
+                        future: _getImageUrl(),
+                        builder: (context, snapshot) {
+                          // 로딩 중일 때 기본 이미지 사용
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return Container(
+                              width: 80,
+                              height: 80,
+                              margin: EdgeInsets.only(left: 18.0, right: 18.0, top: 10.0, bottom: 10.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                image: DecorationImage(
+                                  image: AssetImage('assets/icons/Naver_Line_Webtoon_logo.png'),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            );
+                          }
+                          // 에러 발생 시 기본 이미지 사용
+                          if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+                            return Container(
+                              width: 80,
+                              height: 80,
+                              margin: EdgeInsets.only(left: 18.0, right: 18.0, top: 10.0, bottom: 10.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                image: DecorationImage(
+                                  image: AssetImage('assets/icons/Naver_Line_Webtoon_logo.png'),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            );
+                          }
+                          // Firebase에서 가져온 이미지 URL을 사용
+                          return Container(
+                            width: 80,
+                            height: 80,
+                            margin: EdgeInsets.only(left: 18.0, right: 18.0, top: 10.0, bottom: 10.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              image: DecorationImage(
+                                image: NetworkImage(snapshot.data!), // 로드된 URL을 사용하여 이미지 표시
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                       Positioned(
                         bottom: 10,
                         right: 10,
                         child: Container(
-                          width: 14, // 아이콘의 너비
-                          height: 14, // 아이콘의 높이
+                          width: 14,
+                          height: 14,
                           decoration: BoxDecoration(
                             image: DecorationImage(
                               image: AssetImage(
-                                  documentSnapshot['platform']?.toString().toLowerCase() == '카카오'
-                                      ? 'assets/icons/Kakao.png'
-                                      : 'assets/icons/Naver.png'
+                                documentSnapshot['platform']?.toString().toLowerCase() == '카카오'
+                                    ? 'assets/icons/Kakao.png'
+                                    : 'assets/icons/Naver.png',
                               ),
                               fit: BoxFit.cover,
                             ),
@@ -326,7 +375,6 @@ class WebtoonItem extends StatelessWidget {
                     ],
                   ),
                 ),
-                // 글 리스트 부분
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -367,45 +415,8 @@ class WebtoonItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                InkWell(
-                  onTap: () => onImageTap(), // 함수 참조를 전달
-                  child: Container(
-                    width: 23, // 첫 번째 이미지의 너비
-                    height: 20,
-                    margin: EdgeInsets.all(10), // 이미지와 텍스트 간의 간격 조정
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage(imagePath), // 첫 번째 이미지 경로
-                        fit: BoxFit.cover, // 사진이 박스에 맞게 채워지도록 설정
-                      ),
-                    ),
-                  ),
-                ),
-                // 두 번째 이미지
-                InkWell(
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return PickaBookMakeWidget();
-                      },
-                    );
-                  },
-                  child: Container(
-                    width: 24, // 두 번째 이미지의 너비
-                    height: 17, // 두 번째 이미지의 높이
-                    margin: EdgeInsets.only(left: 10.0, right: 20.0),
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/icons/box.png'), // 첫 번째 이미지 경로
-                        fit: BoxFit.cover, // 사진이 박스에 맞게 채워지도록 설정
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
-            // 새로운 요소 추가
             Container(
               height: 0.5,
               width: double.infinity,
@@ -417,6 +428,7 @@ class WebtoonItem extends StatelessWidget {
     );
   }
 }
+
 
 
 
@@ -450,7 +462,7 @@ class PickaBookItem extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     image: DecorationImage(
-                      image: AssetImage('assets/icons/Naver_Line_Webtoon_logo.png'),
+                      image:  AssetImage(imagePath),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -502,7 +514,7 @@ class PickaBookItem extends StatelessWidget {
                               ),
                               child: Center(
                                 child: Text(
-                                  '# ${(documentSnapshot['tag'] != null && documentSnapshot['tag'].isNotEmpty) ? documentSnapshot['tag'][0] : ' '}',
+                                  '# ${(documentSnapshot['tags'] != null && documentSnapshot['tags'].isNotEmpty) ? documentSnapshot['tags'][0] : ' '}',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'Pretendard',
@@ -524,7 +536,7 @@ class PickaBookItem extends StatelessWidget {
                               ),
                               child: Center(
                                 child: Text(
-                                  '# ${(documentSnapshot['tag'] != null && documentSnapshot['tag'].length > 1) ? documentSnapshot['tag'][1] : ' '}',
+                                  '# ${(documentSnapshot['tags'] != null && documentSnapshot['tags'].length > 1) ? documentSnapshot['tags'][1] : ' '}',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'Pretendard',
@@ -546,7 +558,7 @@ class PickaBookItem extends StatelessWidget {
                               ),
                               child: Center(
                                 child: Text(
-                                  '# ${(documentSnapshot['tag'] != null && documentSnapshot['tag'].length > 2) ? documentSnapshot['tag'][2] : ' ' }',
+                                  '# ${(documentSnapshot['tags'] != null && documentSnapshot['tags'].length > 2) ? documentSnapshot['tags'][2] : ' ' }',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'Pretendard',
